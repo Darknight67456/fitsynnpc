@@ -1,0 +1,23 @@
+import { useCallback, useEffect, useState } from 'react'
+import { supabase } from '../../lib/supabase'
+import type { ClothingItem } from '../../types'
+
+export function useWardrobe() {
+  const [items, setItems] = useState<ClothingItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const reload = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('clothing_items')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) setError(error.message)
+    else setItems(data as ClothingItem[])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { void reload() }, [reload])
+
+  return { items, loading, error, reload }
+}
