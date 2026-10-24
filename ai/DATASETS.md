@@ -1,0 +1,21 @@
+# Datasets used in FitSync
+
+Fill in one row per dataset BEFORE you download it. Raw data stays on Google Drive and is never committed to GitHub.
+Check every citation on the dataset's own download page, because the exact title, authors and year can differ.
+
+|Dataset|Link (paste the page you used)|License / terms (copy the key sentence)|Date downloaded|Paper to cite|Used for|
+|-|-|-|-|-|-|
+|Polyvore Outfits|https://github.com/mvasil/fashion-compatibility||18/10/2026|@inproceedings{VasilevaECCV18FasionCompatibility,<br />Author = {Mariya I. Vasileva and Bryan A. Plummer and Krishna Dusad and Shreya Rajpal and Ranjitha Kumar and David Forsyth},<br />Title = {Learning Type-Aware Embeddings for Fashion Compatibility},<br />booktitle = {ECCV},<br />Year = {2018}|Task 3 compatibility model, Task 6 catalogue|
+|Rent the Runway fit data|https://www.kaggle.com/datasets/rmisra/clothing-fit-dataset-for-size-recommendation?resource=download|Please link to rishabhmisra.github.io/publications as the source of this dataset. Thanks!<br /><br />|18/10/2026|@inproceedings{misra2018decomposing,<br />  title={Decomposing fit semantics for product size recommendation in metric spaces},<br />  author={Misra, Rishabh and Wan, Mengting and McAuley, Julian},<br />  booktitle={Proceedings of the 12th ACM Conference on Recommender Systems},<br />  pages={422--426},<br />  year={2018},<br />  organization={ACM}<br />}<br />@book{misra2021sculpting,<br />  author = {Misra, Rishabh and Grover, Jigyasa},<br />  year = {2021},<br />  month = {01},<br />  pages = {},<br />  title = {Sculpting Data for ML: The first act of Machine Learning},<br />  isbn = {9798585463570}<br />}<br />|Task 5 size model|
+|ModCloth fit data||||Same paper as Rent the Runway|Task 5 second size model (optional)|
+|DeepFashion (optional)||||Liu et al., DeepFashion: Powering Robust Clothes Recognition and Retrieval with Rich Annotations, CVPR 2016|Task 7 label classifier|
+|ANSUR II (stretch)|https://www.kaggle.com/datasets/saifsagor/ansur-ii||18/10/2026|Check the citation on the download page (US Army Anthropometric Survey 2012)|Avatar body proportions|
+|Fashion-CLIP (pretrained model)|https://github.com/patrickjohncyh/fashion-clip|||@Article{Chia2022,<br />    title="Contrastive language and vision learning of general fashion concepts",<br />    author="Chia, Patrick John<br />            and Attanasio, Giuseppe<br />            and Bianchi, Federico<br />            and Terragni, Silvia<br />            and Magalh{\\\~a}es, Ana Rita<br />            and Goncalves, Diogo<br />            and Greco, Ciro<br />            and Tagliabue, Jacopo",<br />    journal="Scientific Reports",<br />    year="2022",<br />    month="Nov",<br />    day="08",<br />    volume="12",<br />    number="1",<br />    pages="18958",<br />    abstract="The steady rise of online shopping goes hand in hand with the development of increasingly complex ML and NLP models. While most use cases are cast as specialized supervised learning problems, we argue that practitioners would greatly benefit from general and transferable representations of products. In this work, we build on recent developments in contrastive learning to train FashionCLIP, a CLIP-like model adapted for the fashion industry. We demonstrate the effectiveness of the representations learned by FashionCLIP with extensive tests across a variety of tasks, datasets and generalization probes. We argue that adaptations of large pre-trained models such as CLIP offer new perspectives in terms of scalability and sustainability for certain types of players in the industry. Finally, we detail the costs and environmental impact of training, and release the model weights and code as open source contribution to the community.",<br />    issn="2045-2322",<br />    doi="10.1038/s41598-022-23052-9",<br />    url="https://doi.org/10.1038/s41598-022-23052-9"<br />}|Embeddings for every task|
+|Our own 200 test photos|Taken by the team|Team members consented, no faces|||Testing the recognition model|
+
+## Notes for the report
+
+* Known limits of each dataset (who is in it, which clothes, which sizes):
+* What we changed or filtered (for example outfits with 2 to 5 items only):
+* Subsets we used (for example the first 15,000 outfits):
+

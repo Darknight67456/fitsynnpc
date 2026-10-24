@@ -1,0 +1,11 @@
+
+torch
+transformers
+pillow
+numpy
+pandas
+scikit-learn
+lightgbm
+fastapi
+uvicorn[standard]
+python-multipart

@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+ai/data/
+*.zip
+*.npy
+*.csv
