@@ -5,7 +5,7 @@ ENV HF_HOME=/app/hf PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
 # The small CPU-only PyTorch, because there is no graphics card.
-RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu \
  && pip install --no-cache-dir -r requirements.txt
 
 # Download the AI model while building, so the service starts fast instead of downloading it every cold start.
