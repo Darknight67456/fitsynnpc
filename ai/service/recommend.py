@@ -67,8 +67,11 @@ def harmony(parts):
     return float(np.mean(sims))
 
 
-def build_outfits(items, scores, weather, top_k=6, n=3):
-    """An outfit is shoes + EITHER a dress/one-piece OR a top and a bottom, plus outerwear when cool or rainy."""
+def build_outfits(items, scores, weather, outerwear='auto', accessories=(), top_k=6, n=3):
+    """An outfit is shoes + EITHER a dress/one-piece OR a top and a bottom.
+    outerwear: 'auto' (only when cool or rainy), 'yes' (always add one) or 'no'.
+    accessories: accessory types to add, e.g. ['bag', 'watch']; the best item of each type is added.
+    Returns (outfits, missing_required, notes)."""
     by_cat = {}
     for it in items:
         by_cat.setdefault(it['category'], []).append(it)
@@ -84,9 +87,24 @@ def build_outfits(items, scores, weather, top_k=6, n=3):
     if not by_cat.get('shoes'):
         missing.append('shoes')
     if missing:
-        return [], missing
+        return [], missing, []
 
-    layer = ['outerwear'] if weather in ('cool', 'rainy') and by_cat.get('outerwear') else []
+    notes = []
+    want_outer = outerwear == 'yes' or (outerwear == 'auto' and weather in ('cool', 'rainy'))
+    layer = []
+    if want_outer:
+        if by_cat.get('outerwear'):
+            layer.append('outerwear')
+        else:
+            notes.append('You have no outerwear saved, so these outfits have none.')
+    acc_by_type = {}
+    for it in by_cat.get('accessory', []):
+        acc_by_type.setdefault(it.get('subtype') or 'other', []).append(it)
+    wanted = [t for t in dict.fromkeys(accessories) if acc_by_type.get(t)]
+    for t in dict.fromkeys(accessories):
+        if not acc_by_type.get(t):
+            notes.append(f'You have no {t} saved, so these outfits have none.')
+
     combos = []
     for mode in modes:
         slots = mode + ['shoes'] + layer
@@ -110,7 +128,16 @@ def build_outfits(items, scores, weather, top_k=6, n=3):
             chosen.append(c)
         if len(chosen) == n:
             break
-    return chosen, []
+    used = set()                                       # accessories already given to an earlier outfit
+    for c in chosen:                                   # add the best item of each wanted accessory type
+        for t in wanted:
+            def fit(a, parts=c['parts']):
+                sims = [float(np.dot(a['embedding'], p['embedding'])) for p in parts]
+                return 0.7 * scores[a['id']] + 0.3 * float(np.mean(sims)) - (0.15 if a['id'] in used else 0)
+            pick = max(acc_by_type[t], key=fit)        # the small penalty gives each outfit a different one when possible
+            used.add(pick['id'])
+            c['parts'] = c['parts'] + [pick]
+    return chosen, [], notes
 
 
 def template_reason(c, formality, weather):
