@@ -23,6 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+dist/
 
 ai/data/
 *.zip

@@ -1,4 +1,4 @@
-export type Category = 'top' | 'bottom' | 'outerwear' | 'shoes' | 'accessory'
+export type Category = 'top' | 'bottom' | 'outerwear' | 'dress' | 'shoes' | 'accessory'
 
 export interface ClothingItem {
   id: string
@@ -10,10 +10,13 @@ export interface ClothingItem {
   pattern: string
   fabric: string | null
   season: string
-  formality: number        // 1 (very casual) to 5 (very formal)
+  formality: number        // 1 (very casual) to 5 (very formal): the typical level
+  formality_levels?: number[] | null   // every level the item suits; all 5 = all occasions
   tags: string[]
   wear_count: number
   last_worn_at: string | null
+  embedding?: number[] | null     // set by the AI service
+  color_feat?: number[] | null
 }
 
 export interface BodyProfile {

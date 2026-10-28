@@ -1,48 +1,42 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import Button from '../../components/Button'
+import Modal from '../../components/Modal'
+import TagFields from './TagFields'
+import type { Tags } from './options'
 import type { ClothingItem } from '../../types'
 
 export default function EditModal({ item, onClose, onSaved }: {
   item: ClothingItem; onClose: () => void; onSaved: () => void
 }) {
-  const [f, setF] = useState({
+  const [tags, setTags] = useState<Tags>({
     name: item.name, category: item.category, color: item.color, pattern: item.pattern,
     fabric: item.fabric ?? '', season: item.season, formality: item.formality,
+    formality_levels: item.formality_levels?.length ? item.formality_levels : [item.formality],
   })
   const [error, setError] = useState('')
-  const set = (k: string, v: string | number) => setF(prev => ({ ...prev, [k]: v }))
+  const [busy, setBusy] = useState(false)
 
   async function save() {
-    const { error } = await supabase.from('clothing_items').update(f).eq('id', item.id)
+    if (!tags.name.trim()) { setError('Please give the item a name.'); return }
+    setBusy(true)
+    const { error } = await supabase.from('clothing_items').update(tags).eq('id', item.id)
+    setBusy(false)
     if (error) setError(error.message)
     else onSaved()
   }
 
-  const input = 'w-full rounded border p-2'
   return (
-    <div className='fixed inset-0 z-10 flex items-center justify-center bg-black/40 p-4'>
-      <div className='w-full max-w-sm space-y-2 rounded bg-white p-4'>
-        <h2 className='font-bold'>Edit item</h2>
-        <input className={input} value={f.name} onChange={e => set('name', e.target.value)} />
-        <select className={input} value={f.category} onChange={e => set('category', e.target.value)}>
-          {['top', 'bottom', 'outerwear', 'shoes', 'accessory'].map(c => <option key={c}>{c}</option>)}
-        </select>
-        <input type='color' value={f.color} onChange={e => set('color', e.target.value)} />
-        <input className={input} value={f.pattern} onChange={e => set('pattern', e.target.value)} />
-        <input className={input} value={f.fabric} onChange={e => set('fabric', e.target.value)} />
-        <select className={input} value={f.season} onChange={e => set('season', e.target.value)}>
-          <option>all</option><option>hot</option><option>cool</option>
-        </select>
-        <label className='block'>Formality: {f.formality}
-          <input type='range' min={1} max={5} value={f.formality} className='w-full'
-            onChange={e => set('formality', Number(e.target.value))} />
-        </label>
+    <Modal open title='Edit item' onClose={onClose}>
+      <div className='max-h-[70vh] space-y-4 overflow-y-auto pr-1'>
+        {item.image_url && <img src={item.image_url} alt={item.name} className='h-32 rounded' />}
+        <TagFields value={tags} onChange={setTags} />
         {error && <p className='text-sm text-red-600'>{error}</p>}
-        <div className='flex justify-end gap-2'>
-          <button className='rounded border px-3 py-2' onClick={onClose}>Cancel</button>
-          <button className='rounded bg-black px-3 py-2 text-white' onClick={save}>Save</button>
-        </div>
       </div>
-    </div>
+      <div className='mt-4 flex justify-end gap-2'>
+        <Button variant='secondary' onClick={onClose}>Cancel</Button>
+        <Button onClick={save} disabled={busy}>{busy ? 'Saving...' : 'Save'}</Button>
+      </div>
+    </Modal>
   )
 }
