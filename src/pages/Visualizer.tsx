@@ -11,7 +11,7 @@ import Button from '../components/Button'
 import type { Category, ClothingItem } from '../types'
 
 // Only these categories are drawn on the avatar.
-const WEARABLE: Category[] = ['top', 'bottom', 'outerwear', 'shoes']
+const WEARABLE: Category[] = ['top', 'bottom', 'dress', 'outerwear', 'shoes']
 
 export default function Visualizer() {
   const { items, loading } = useWardrobe()
@@ -29,7 +29,12 @@ export default function Visualizer() {
     setWearing(prev => {
       const next = { ...prev }
       if (prev[item.category]?.id === item.id) delete next[item.category]
-      else next[item.category] = item
+      else {
+        next[item.category] = item
+        // a dress replaces the top and bottom, and a top or bottom replaces the dress
+        if (item.category === 'dress') { delete next.top; delete next.bottom }
+        if (item.category === 'top' || item.category === 'bottom') delete next.dress
+      }
       return next
     })
   }

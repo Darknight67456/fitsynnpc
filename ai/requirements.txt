@@ -9,3 +9,5 @@ lightgbm
 fastapi
 uvicorn[standard]
 python-multipart
+google-genai
+anthropic

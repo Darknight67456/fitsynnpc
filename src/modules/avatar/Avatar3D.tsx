@@ -88,6 +88,22 @@ function Garment({ item, p }: { item: ClothingItem; p: BodyProfile }) {
       </mesh>
     )
   }
+  if (item.category === 'dress') {
+    // one piece: a fitted upper body plus a flared skirt down to about the knee
+    const skirtH = L.leg * 0.58
+    return (
+      <>
+        <mesh scale={[1, 1, 0.65]}>
+          <latheGeometry args={[torsoPoints(p, 1.05), 48]} />
+          <Fabric item={item} />
+        </mesh>
+        <mesh position={[0, L.leg - skirtH / 2 + 0.02, 0]} scale={[1, 1, 0.75]}>
+          <cylinderGeometry args={[r(p.hips) * 1.05, r(p.hips) * 1.45, skirtH, 40, 1, true]} />
+          <Fabric item={item} />
+        </mesh>
+      </>
+    )
+  }
   if (item.category === 'bottom') {
     return (
       <>

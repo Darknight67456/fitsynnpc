@@ -13,7 +13,7 @@ const img = (hex: string, label: string) =>
 type Seed = Pick<
   ClothingItem,
   'name' | 'category' | 'color' | 'pattern' | 'fabric' | 'season' | 'formality'
-> & { tags?: string[]; wear?: number; last?: string | null }
+> & { tags?: string[]; wear?: number; last?: string | null; levels?: number[] }
 
 const build = (s: Seed, i: number): ClothingItem => ({
   id: `seed-${String(i + 1).padStart(2, '0')}`,
@@ -26,12 +26,14 @@ const build = (s: Seed, i: number): ClothingItem => ({
   fabric: s.fabric,
   season: s.season,
   formality: s.formality,
+  formality_levels: s.levels ?? [s.formality],
   tags: s.tags ?? [],
   wear_count: s.wear ?? 0,
   last_worn_at: s.last ?? null,
 })
 
-// formality: 1 = loungewear/sportswear, 2 = casual, 3 = smart casual, 4 = business, 5 = formal
+// formality: 1 = loungewear, 2 = casual, 3 = smart casual, 4 = business, 5 = formal
+// season: all = all year, hot = hot and sunny, rainy = rainy season, cool = cool or air-con
 const raw: Seed[] = [
   // ---- 10 tops ----
   { name: 'White Oxford Shirt', category: 'top', color: '#f8f8f5', pattern: 'plain', fabric: 'cotton', season: 'all', formality: 4, tags: ['office', 'formal'], wear: 12, last: '2026-10-10' },
@@ -59,17 +61,21 @@ const raw: Seed[] = [
   { name: 'Navy Blazer', category: 'outerwear', color: '#1b2a49', pattern: 'plain', fabric: 'wool', season: 'cool', formality: 4, tags: ['formal', 'office'], wear: 4, last: '2026-09-30' },
   { name: 'Black Leather Jacket', category: 'outerwear', color: '#111111', pattern: 'plain', fabric: 'leather', season: 'cool', formality: 2, tags: ['streetwear'], wear: 3, last: '2026-09-12' },
   { name: 'Denim Jacket', category: 'outerwear', color: '#5d82b5', pattern: 'plain', fabric: 'denim', season: 'cool', formality: 2, wear: 6, last: '2026-10-01' },
-  { name: 'Beige Trench Coat', category: 'outerwear', color: '#c8b08a', pattern: 'plain', fabric: 'cotton', season: 'cool', formality: 4 },
+  { name: 'Beige Trench Coat', category: 'outerwear', color: '#c8b08a', pattern: 'plain', fabric: 'cotton', season: 'rainy', formality: 4 },
+
+  // ---- 2 dresses / one-pieces ----
+  { name: 'Floral Midi Dress', category: 'dress', color: '#d98ca3', pattern: 'floral', fabric: 'chiffon', season: 'hot', formality: 3, tags: ['party'], wear: 2, last: '2026-09-14' },
+  { name: 'Black Evening Dress', category: 'dress', color: '#141414', pattern: 'plain', fabric: 'silk', season: 'all', formality: 5, tags: ['formal'], wear: 1, last: '2026-06-02' },
 
   // ---- 5 shoes ----
-  { name: 'Black Oxford Shoes', category: 'shoes', color: '#151515', pattern: 'plain', fabric: 'leather', season: 'all', formality: 5, tags: ['formal'], wear: 5, last: '2026-10-10' },
-  { name: 'White Sneakers', category: 'shoes', color: '#f5f5f5', pattern: 'plain', fabric: 'leather', season: 'all', formality: 2, wear: 25, last: '2026-10-16' },
+  { name: 'Black Oxford Shoes', category: 'shoes', color: '#151515', pattern: 'plain', fabric: 'leather', season: 'all', formality: 4, levels: [4, 5], tags: ['formal'], wear: 5, last: '2026-10-10' },
+  { name: 'White Sneakers', category: 'shoes', color: '#f5f5f5', pattern: 'plain', fabric: 'leather', season: 'all', formality: 2, levels: [1, 2, 3], wear: 25, last: '2026-10-16' },
   { name: 'Brown Loafers', category: 'shoes', color: '#7a4a2b', pattern: 'plain', fabric: 'leather', season: 'all', formality: 4, tags: ['smart-casual'], wear: 4, last: '2026-09-25' },
   { name: 'Red Heels', category: 'shoes', color: '#b3202a', pattern: 'plain', fabric: 'leather', season: 'all', formality: 4, tags: ['party'] },
   { name: 'Grey Running Shoes', category: 'shoes', color: '#9a9a9a', pattern: 'plain', fabric: 'polyester', season: 'all', formality: 1, tags: ['sportswear'], wear: 11, last: '2026-10-13' },
 
   // ---- 3 accessories ----
-  { name: 'Silver Wrist Watch', category: 'accessory', color: '#c0c0c0', pattern: 'plain', fabric: 'metal', season: 'all', formality: 4, wear: 14, last: '2026-10-15' },
+  { name: 'Silver Wrist Watch', category: 'accessory', color: '#c0c0c0', pattern: 'plain', fabric: 'metal', season: 'all', formality: 3, levels: [2, 3, 4, 5], wear: 14, last: '2026-10-15' },
   { name: 'Black Leather Belt', category: 'accessory', color: '#1a1a1a', pattern: 'plain', fabric: 'leather', season: 'all', formality: 3, wear: 9, last: '2026-10-10' },
   { name: 'Dusty Rose Silk Shawl', category: 'accessory', color: '#d8a7b1', pattern: 'plain', fabric: 'silk', season: 'all', formality: 4, tags: ['modest', 'traditional'], wear: 2, last: '2026-05-01' },
 ]
