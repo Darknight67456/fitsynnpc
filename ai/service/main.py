@@ -45,6 +45,7 @@ class Item(BaseModel):
     category: str
     season: str = 'all'
     formality: int = 2
+    subtype: str | None = None                    # accessories only: bag, watch, ring...
     formality_levels: list[int] | None = None     # every level the item suits (all 5 = all occasions)
     wear_count: int = 0
     embedding: list[float]
@@ -55,6 +56,8 @@ class Request(BaseModel):
     items: list[Item]
     formality: int | None = None      # optional: the user picked it
     weather: str | None = None        # optional: 'hot' | 'rainy' | 'cool' | 'all'
+    outerwear: str = 'auto'           # 'auto' | 'yes' | 'no'
+    accessories: list[str] = []       # accessory types to add: 'bag', 'watch', 'ring', ...
 
 
 def ask_llm(prompt: str, max_tokens: int = 400):
@@ -137,13 +140,13 @@ def recommend(req: Request):
     formality = max(1, min(5, formality))
 
     scores = R.score_items(items, text_vec, formality, weather)
-    chosen, missing = R.build_outfits(items, scores, weather)
+    chosen, missing, notes = R.build_outfits(items, scores, weather, req.outerwear, req.accessories)
     if missing:
-        return {'formality': formality, 'weather': weather, 'outfits': [],
+        return {'formality': formality, 'weather': weather, 'outfits': [], 'notes': [],
                 'message': 'Add ' + ' and '.join(missing) + ' to your wardrobe to get outfits.'}
 
     reasons = llm_reasons(req.event, chosen) or [R.template_reason(c, formality, weather) for c in chosen]
-    return {'formality': formality, 'weather': weather, 'message': '',
+    return {'formality': formality, 'weather': weather, 'message': '', 'notes': notes,
             'outfits': [{'item_ids': [p['id'] for p in c['parts']],
                          'score': round(c['score'], 3), 'reason': r}
                         for c, r in zip(chosen, reasons)]}
