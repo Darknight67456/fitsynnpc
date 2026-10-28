@@ -4,13 +4,14 @@ import json
 import os
 
 import numpy as np
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from pydantic import BaseModel
 
 import features
 import recommend as R
+import stylist
 
 app = FastAPI(title='FitSync AI')
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv('ALLOW_ORIGINS', '*').split(','),
@@ -150,3 +151,107 @@ def recommend(req: Request):
             'outfits': [{'item_ids': [p['id'] for p in c['parts']],
                          'score': round(c['score'], 3), 'reason': r}
                         for c, r in zip(chosen, reasons)]}
+
+
+# ---------------- Style assistant: selfie + a question ----------------
+
+ACCESSORY_TYPES = ['bag', 'watch', 'ring', 'necklace', 'earrings', 'bracelet', 'brooch', 'neckwear',
+                   'hat', 'hairwear', 'eyewear', 'gloves', 'legwear', 'belt']
+TARGET_PHRASES = {
+    'top': 'a shirt, blouse or T-shirt', 'bottom': 'trousers, jeans or a skirt', 'dress': 'a dress',
+    'outerwear': 'a jacket, blazer or coat', 'shoes': 'shoes, sneakers or heels',
+    'accessories': 'accessories and jewelry', 'bag': 'a handbag or backpack', 'watch': 'a wrist watch',
+    'ring': 'a ring', 'necklace': 'a necklace', 'earrings': 'earrings', 'bracelet': 'a bracelet',
+    'brooch': 'a brooch', 'neckwear': 'a scarf, tie or shawl', 'hat': 'a hat or cap',
+    'hairwear': 'a hair clip or hair band', 'eyewear': 'glasses or sunglasses', 'gloves': 'gloves',
+    'legwear': 'stockings or socks', 'belt': 'a belt',
+}
+
+
+def llm_intent(question, worn, allowed):
+    """Optional: the chat AI works out what the person is asking for. Returns (targets, event) or None."""
+    text = ask_llm(
+        f'A person is wearing: {worn}.\nThey ask: "{question}"\n'
+        f'Which kinds of item from their wardrobe do they want? Choose from: {", ".join(allowed)}. '
+        '"suggest accessories" means several accessory types. '
+        'Also give a short "event" (like "wedding" or "office") if they mention one, else "". '
+        'Return ONLY JSON like {"targets": ["bottom"], "event": ""}.', 200)
+    try:
+        data = parse_json(text) if text else None
+        targets = [t for t in (data or {}).get('targets', []) if t in allowed]
+        return (targets, str(data.get('event', ''))) if targets else None
+    except Exception:
+        return None
+
+
+def zero_shot_targets(question, wardrobe):
+    """No chat AI: Fashion-CLIP compares the question with a description of each kind of item,
+    considering only the kinds the person actually owns."""
+    owned_acc = [t for t in ACCESSORY_TYPES if any(i['category'] == 'accessory' and i.get('subtype') == t for i in wardrobe)]
+    owned = {i['category'] for i in wardrobe if i['category'] != 'accessory'} | set(owned_acc)
+    names = [n for n in TARGET_PHRASES if n in owned or (n == 'accessories' and owned_acc)] or list(TARGET_PHRASES)
+    sims = features.embed_text([TARGET_PHRASES[n] for n in names]) @ features.embed_text([question])[0]
+    best = names[int(np.argmax(sims))]
+    return owned_acc[:4] if best == 'accessories' else [best]
+
+
+def llm_stylist_reasons(question, worn, results):
+    lines = [f"{i + 1}. {r['target']}: " + ', '.join(p['item']['name'] for p in r['picks']) for i, r in enumerate(results)]
+    text = ask_llm(
+        f'A person wearing {worn} asked: "{question}"\nSuggestions from their wardrobe:\n' + '\n'.join(lines) +
+        '\nWrite ONE short friendly sentence (max 22 words) per line explaining why these go with what they wear. '
+        'Return ONLY a JSON list of strings.', 500)
+    try:
+        out = parse_json(text) if text else None
+        return out if out and len(out) == len(results) else None
+    except Exception:
+        return None
+
+
+@app.post('/assist')
+async def assist(photo: UploadFile = File(...), prompt: str = Form(''), items: str = Form('[]')):
+    """A photo of a person plus a question -> what they are wearing, and what from their wardrobe goes with it."""
+    try:
+        img = Image.open(io.BytesIO(await photo.read())).convert('RGB')
+        wardrobe = json.loads(items)
+    except Exception:
+        raise HTTPException(400, 'Could not read the photo or the wardrobe.')
+    for i in wardrobe:
+        i['embedding'] = np.array(i['embedding'], dtype=np.float32)
+
+    garments = stylist.detect_garments(img)
+    if not garments:
+        return {'detected': [], 'targets': [], 'formality': None, 'message':
+                'I could not see any clothes. Try a clear photo with your whole outfit in view and good light.'}
+    for g, v in zip(garments, features.embed_images([g['crop'] for g in garments])):
+        g['embedding'] = v
+
+    fv = features.embed_text(R.FORMALITY_PROMPTS)
+    body = [g for g in garments if g['category'] != 'accessory'] or garments
+    formality = float(np.mean([R.expected_formality(g['embedding'], fv) for g in body]))
+
+    worn = ', '.join(f"{g['subtype'] or g['category']} (color {g['color']})" for g in garments)
+    question = prompt.strip() or 'What goes well with what I am wearing?'
+    allowed = ['top', 'bottom', 'dress', 'outerwear', 'shoes'] + ACCESSORY_TYPES
+    intent = llm_intent(question, worn, allowed)
+    if intent:
+        targets, event = intent
+    else:
+        targets, event = zero_shot_targets(question, wardrobe), ''
+    text_vec = features.embed_text([event])[0] if event.strip() else None
+
+    anchors = [g for g in garments if (g['subtype'] or g['category']) not in targets]
+    results = stylist.rank_targets(anchors, targets, wardrobe, text_vec, formality)
+    shown = [r for r in results if r['picks']]
+    reasons = (llm_stylist_reasons(question, worn, shown) if shown else None) or [
+        f"Matches the style and dress code of what you are wearing ({R.FORMALITY_NAMES.get(round(formality), 'casual')})." for _ in shown]
+    reason_of = {id(r): why for r, why in zip(shown, reasons)}
+
+    return {
+        'formality': round(formality, 1), 'event': event, 'message': '',
+        'detected': [{'category': g['category'], 'subtype': g['subtype'], 'color': g['color'],
+                      'image': stylist.thumbnail_data_uri(g['crop'])} for g in garments],
+        'targets': [{'target': r['target'], 'reason': reason_of.get(id(r), ''),
+                     'picks': [{'item_id': p['item']['id'], 'score': round(p['score'], 3)} for p in r['picks']]}
+                    for r in results],
+    }

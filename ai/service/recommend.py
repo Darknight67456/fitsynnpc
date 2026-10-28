@@ -39,6 +39,12 @@ def understand_event(text_vec, formality_vecs, weather_vecs):
     return round(formality), weather
 
 
+def expected_formality(vec, formality_vecs):
+    """Zero-shot: how formal does this photo's clothing look? (1 to 5, from image-vs-description similarity)"""
+    p = _softmax(formality_vecs @ vec)
+    return float((p * np.arange(1, 6)).sum())
+
+
 def score_items(items, text_vec, formality, weather):
     """Returns {item_id: score between 0 and 1}. Higher = better for this event."""
     scores = {}
