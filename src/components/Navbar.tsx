@@ -6,6 +6,7 @@ import Button from './Button'
 const LINKS = [
   { to: '/', label: 'Wardrobe' },
   { to: '/outfits', label: 'Outfits' },
+  { to: '/stylist', label: 'Stylist' },
   { to: '/colors', label: 'Colors' },
   { to: '/visualizer', label: 'Try-on' },
   { to: '/size', label: 'Size' },

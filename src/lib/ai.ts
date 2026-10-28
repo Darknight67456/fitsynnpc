@@ -11,6 +11,29 @@ export async function embedImage(image: Blob): Promise<Embedding> {
   return res.json() as Promise<Embedding>
 }
 
+export interface Detected { category: string; subtype: string | null; color: string; image: string }
+export interface Suggestion {
+  target: string
+  reason: string
+  picks: { item_id: string; score: number }[]
+}
+export interface AssistResult {
+  detected: Detected[]
+  targets: Suggestion[]
+  formality: number | null
+  message: string
+}
+
+export async function assist(photo: Blob, prompt: string, items: object[]): Promise<AssistResult> {
+  const body = new FormData()
+  body.append('photo', photo, 'selfie.jpg')
+  body.append('prompt', prompt)
+  body.append('items', JSON.stringify(items))
+  const res = await fetch(`${AI_URL}/assist`, { method: 'POST', body })
+  if (!res.ok) throw new Error('The AI service returned an error.')
+  return res.json() as Promise<AssistResult>
+}
+
 export interface Outfit { item_ids: string[]; score: number; reason: string }
 export interface RecommendResult { formality: number; weather: string; message: string; notes: string[]; outfits: Outfit[] }
 
