@@ -20,7 +20,7 @@ export const filtersActive = (f: Filters) =>
 export function applyFilters(items: ClothingItem[], f: Filters): ClothingItem[] {
   const q = f.search.trim().toLowerCase()
   const out = items.filter(i =>
-    (!q || `${i.name} ${i.fabric ?? ''} ${i.pattern} ${(i.tags ?? []).join(' ')}`.toLowerCase().includes(q)) &&
+    (!q || `${i.name} ${i.subtype ?? ''} ${i.fabric ?? ''} ${i.pattern} ${(i.tags ?? []).join(' ')}`.toLowerCase().includes(q)) &&
     (f.category === 'all' || i.category === f.category) &&
     // an "all year" item fits every season, so it also shows when you pick one
     (f.season === 'all' || i.season === f.season || i.season === 'all') &&

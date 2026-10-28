@@ -45,7 +45,7 @@ export const FABRICS_BY_CATEGORY: Record<string, Option[]> = {
   shoes: [o('leather', 'Leather'), o('faux leather', 'Faux leather'), o('suede', 'Suede'), o('canvas', 'Canvas'), o('rubber', 'Rubber'),
     o('mesh', 'Mesh or knit'), o('fabric', 'Fabric or satin'), o('plastic', 'Plastic or jelly'), o('other', 'Other'), NOT_SURE],
   accessory: [o('metal', 'Metal'), o('leather', 'Leather'), o('fabric', 'Fabric'), o('silk', 'Silk'), o('pearl', 'Pearl or beads'),
-    o('plastic', 'Plastic or resin'), o('wood', 'Wood'), o('other', 'Other'), NOT_SURE],
+    o('plastic', 'Plastic or resin'), o('wood', 'Wood'), o('canvas', 'Canvas'), o('glass', 'Glass'), o('other', 'Other'), NOT_SURE],
 }
 
 export const patternsFor = (category: string): Option[] => PATTERNS_BY_CATEGORY[category] ?? CLOTH_PATTERNS
@@ -61,6 +61,18 @@ export const defaultsFor = (category: string) => ({
   pattern: 'plain',
   fabric: category === 'shoes' || category === 'accessory' ? 'unknown' : materialsFor(category)[0].value,
 })
+
+// The kind of accessory. Each outfit can take one of several of these.
+export const ACCESSORY_TYPES: Option[] = [
+  o('bag', 'Bag'), o('watch', 'Watch'), o('ring', 'Ring'), o('necklace', 'Necklace'), o('earrings', 'Earrings'),
+  o('bracelet', 'Bracelet'), o('brooch', 'Brooch'),
+  { value: 'neckwear', label: 'Neckwear', hint: 'scarf, tie, bow tie, shawl' },
+  o('hat', 'Hat'),
+  { value: 'hairwear', label: 'Hairwear', hint: 'clip, band, scrunchie, tudung pin' },
+  o('eyewear', 'Eyewear'), o('gloves', 'Gloves'),
+  { value: 'legwear', label: 'Legwear', hint: 'stockings, tights, socks' },
+  o('belt', 'Belt'), o('other', 'Other'),
+]
 
 // Malaysia has no four seasons, so "season" means the weather you wear it in.
 export const SEASONS: Option[] = [
@@ -107,9 +119,10 @@ export interface Tags {
   season: string
   formality: number             // typical level, kept for older code
   formality_levels: number[]    // every occasion level the item suits
+  subtype: string               // only for accessories: bag, watch, ring... ('' for everything else)
 }
 
 export const DEFAULT_TAGS: Tags = {
   name: '', category: 'top', color: '#808080', pattern: 'plain', fabric: 'cotton', season: 'all',
-  formality: 2, formality_levels: [2],
+  formality: 2, formality_levels: [2], subtype: '',
 }

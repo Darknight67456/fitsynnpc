@@ -13,12 +13,14 @@ export default function EditModal({ item, onClose, onSaved }: {
     name: item.name, category: item.category, color: item.color, pattern: item.pattern,
     fabric: item.fabric ?? '', season: item.season, formality: item.formality,
     formality_levels: item.formality_levels?.length ? item.formality_levels : [item.formality],
+    subtype: item.subtype ?? '',
   })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
   async function save() {
     if (!tags.name.trim()) { setError('Please give the item a name.'); return }
+    if (tags.category === 'accessory' && !tags.subtype) { setError('Choose the type of accessory (bag, watch...).'); return }
     setBusy(true)
     const { error } = await supabase.from('clothing_items').update(tags).eq('id', item.id)
     setBusy(false)

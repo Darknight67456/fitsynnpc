@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useWardrobe } from '../modules/wardrobe/useWardrobe'
 import { COLOR_NAMES, colorName } from '../modules/wardrobe/colorFamily'
 import { applyFilters, filtersActive, NO_FILTERS, type Filters } from '../modules/wardrobe/wardrobeFilters'
-import { ALL_PATTERNS, CATEGORIES, SEASONS, labelOf, occasionText } from '../modules/wardrobe/options'
+import { ACCESSORY_TYPES, ALL_PATTERNS, CATEGORIES, SEASONS, labelOf, occasionText } from '../modules/wardrobe/options'
 import UploadForm from '../modules/wardrobe/UploadForm'
 import EditModal from '../modules/wardrobe/EditModal'
 import WearModal from '../modules/wardrobe/WearModal'
@@ -109,7 +109,7 @@ export default function Wardrobe() {
                   <span className='h-3 w-3 rounded-full border border-ink/20' style={{ background: item.color }} />
                   {colorName(item.color)}
                 </span>
-                <span className='rounded-full bg-ink/5 px-2 py-0.5'>{labelOf(CATEGORIES, item.category)}</span>
+                <span className='rounded-full bg-ink/5 px-2 py-0.5'>{item.category === 'accessory' && item.subtype ? labelOf(ACCESSORY_TYPES, item.subtype) : labelOf(CATEGORIES, item.category)}</span>
                 <span className='rounded-full bg-ink/5 px-2 py-0.5'>{labelOf(SEASONS, item.season)}</span>
                 <span className='rounded-full bg-ink/5 px-2 py-0.5'>{occasionText(item.formality_levels, item.formality)}</span>
               </div>

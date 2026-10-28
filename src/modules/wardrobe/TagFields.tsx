@@ -1,6 +1,6 @@
 import { Input, Select } from '../../components/Field'
 import {
-  CATEGORIES, FORMALITY, SEASONS, defaultsFor, materialLabel, materialsFor, patternsFor, typicalLevel,
+  ACCESSORY_TYPES, CATEGORIES, FORMALITY, SEASONS, defaultsFor, materialLabel, materialsFor, patternsFor, typicalLevel,
   type Option, type Tags,
 } from './options'
 import { colorName } from './colorFamily'
@@ -32,6 +32,7 @@ export default function TagFields({ value, onChange }: { value: Tags; onChange: 
     const d = defaultsFor(category)
     onChange({
       ...value, category,
+      subtype: category === 'accessory' ? value.subtype : '',
       pattern: patternOk ? value.pattern : d.pattern,
       fabric: fabricOk ? value.fabric : d.fabric,
     })
@@ -77,6 +78,22 @@ export default function TagFields({ value, onChange }: { value: Tags; onChange: 
         </div>
         <p className='mt-1 text-xs text-muted'>Picked from your photo. Change it if it looks wrong.</p>
       </div>
+
+      {value.category === 'accessory' && (
+        <div>
+          <span className='mb-1 block text-sm font-medium'>Type of accessory</span>
+          <div className='flex flex-wrap gap-2'>
+            {ACCESSORY_TYPES.map(t => (
+              <button key={t.value} type='button' title={t.hint} onClick={() => set('subtype', t.value)}
+                aria-pressed={value.subtype === t.value}
+                className={`rounded-full border px-3 py-1 text-sm ${
+                  value.subtype === t.value ? 'border-brand bg-brand text-white' : 'border-ink/20 bg-surface hover:bg-ink/5'}`}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className='grid grid-cols-2 gap-3'>
         <Select label='Pattern' value={value.pattern} onChange={e => set('pattern', e.target.value)}>

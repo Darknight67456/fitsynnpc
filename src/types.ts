@@ -15,6 +15,7 @@ export interface ClothingItem {
   tags: string[]
   wear_count: number
   last_worn_at: string | null
+  subtype?: string | null         // accessories only: bag, watch, ring...
   embedding?: number[] | null     // set by the AI service
   color_feat?: number[] | null
 }
