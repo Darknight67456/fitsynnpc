@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { embedImage, recommend, type RecommendResult } from '../lib/ai'
 import { useWardrobe } from '../modules/wardrobe/useWardrobe'
 import { logWornToday } from '../modules/wardrobe/wearLog'
-import { FORMALITY, SEASONS, labelOf } from '../modules/wardrobe/options'
+import { ACCESSORY_TYPES, FORMALITY, SEASONS, labelOf } from '../modules/wardrobe/options'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import { Select } from '../components/Field'
@@ -18,6 +18,8 @@ export default function Outfits() {
   const [event, setEvent] = useState('')
   const [weather, setWeather] = useState('')       // '' = let the AI decide
   const [formality, setFormality] = useState('')   // '' = let the AI decide
+  const [outerwear, setOuterwear] = useState<'auto' | 'yes' | 'no'>('auto')
+  const [accessories, setAccessories] = useState<string[]>([])   // accessory types the user wants
   const [result, setResult] = useState<RecommendResult | null>(null)
   const [busy, setBusy] = useState(false)
   const [prep, setPrep] = useState('')
@@ -59,10 +61,13 @@ export default function Outfits() {
         items: ready.map(i => ({
           id: i.id, name: i.name, category: i.category, season: i.season,
           formality: i.formality, formality_levels: i.formality_levels?.length ? i.formality_levels : [i.formality],
+          subtype: i.subtype ?? '',
           wear_count: i.wear_count, embedding: i.embedding as number[],
         })),
         formality: formality ? Number(formality) : undefined,
         weather: weather || undefined,
+        outerwear,
+        accessories,
       }))
     } catch (e) {
       setError(e instanceof Error ? `${e.message} Is the AI service running?` : 'Something went wrong.')
@@ -107,6 +112,31 @@ export default function Outfits() {
             {FORMALITY.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </Select>
         </div>
+        <div className='space-y-3'>
+          <Select label='Outerwear (jacket, blazer)' value={outerwear}
+            onChange={e => setOuterwear(e.target.value as 'auto' | 'yes' | 'no')}>
+            <option value='auto'>Only if cool or rainy</option>
+            <option value='yes'>Always add one</option>
+            <option value='no'>No outerwear</option>
+          </Select>
+          <div>
+            <span className='mb-1 block text-sm font-medium'>Accessories (pick any, one of each is added)</span>
+            <div className='flex flex-wrap gap-2'>
+              {ACCESSORY_TYPES.map(t => {
+                const on = accessories.includes(t.value)
+                const have = ready.filter(i => i.category === 'accessory' && (i.subtype ?? 'other') === t.value).length
+                return (
+                  <button key={t.value} type='button' aria-pressed={on} title={t.hint}
+                    onClick={() => setAccessories(on ? accessories.filter(x => x !== t.value) : [...accessories, t.value])}
+                    className={`rounded-full border px-3 py-1 text-sm ${
+                      on ? 'border-brand bg-brand text-white' : 'border-ink/20 bg-surface hover:bg-ink/5'} ${have === 0 && !on ? 'opacity-50' : ''}`}>
+                    {t.label} ({have})
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
         <div className='flex flex-wrap items-center gap-3'>
           <Button onClick={() => void suggest()} disabled={busy || loading || ready.length === 0}>
             {busy ? 'Thinking...' : 'Suggest outfits'}
@@ -130,13 +160,14 @@ export default function Outfits() {
             Read as: {labelOf(FORMALITY, result.formality)} · {labelOf(SEASONS, result.weather)}
           </p>
           {result.message && <Card>{result.message}</Card>}
+          {result.notes?.map(n => <p key={n} className='text-sm text-muted'>{n}</p>)}
           {result.outfits.map((o, idx) => (
             <Card key={idx} className='space-y-3'>
               <div className='flex items-center justify-between'>
                 <p className='font-semibold'>Option {idx + 1}</p>
                 <span className='text-sm text-muted'>match {Math.round(o.score * 100)}%</span>
               </div>
-              <div className='grid grid-cols-2 gap-3 md:grid-cols-4'>
+              <div className='grid grid-cols-2 gap-3 md:grid-cols-5'>
                 {o.item_ids.map(id => {
                   const it = byId.get(id)
                   return it ? (

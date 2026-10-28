@@ -13,7 +13,7 @@ const img = (hex: string, label: string) =>
 type Seed = Pick<
   ClothingItem,
   'name' | 'category' | 'color' | 'pattern' | 'fabric' | 'season' | 'formality'
-> & { tags?: string[]; wear?: number; last?: string | null; levels?: number[] }
+> & { tags?: string[]; wear?: number; last?: string | null; levels?: number[]; subtype?: string }
 
 const build = (s: Seed, i: number): ClothingItem => ({
   id: `seed-${String(i + 1).padStart(2, '0')}`,
@@ -27,6 +27,7 @@ const build = (s: Seed, i: number): ClothingItem => ({
   season: s.season,
   formality: s.formality,
   formality_levels: s.levels ?? [s.formality],
+  subtype: s.subtype ?? null,
   tags: s.tags ?? [],
   wear_count: s.wear ?? 0,
   last_worn_at: s.last ?? null,
@@ -75,9 +76,9 @@ const raw: Seed[] = [
   { name: 'Grey Running Shoes', category: 'shoes', color: '#9a9a9a', pattern: 'plain', fabric: 'polyester', season: 'all', formality: 1, tags: ['sportswear'], wear: 11, last: '2026-10-13' },
 
   // ---- 3 accessories ----
-  { name: 'Silver Wrist Watch', category: 'accessory', color: '#c0c0c0', pattern: 'plain', fabric: 'metal', season: 'all', formality: 3, levels: [2, 3, 4, 5], wear: 14, last: '2026-10-15' },
-  { name: 'Black Leather Belt', category: 'accessory', color: '#1a1a1a', pattern: 'plain', fabric: 'leather', season: 'all', formality: 3, wear: 9, last: '2026-10-10' },
-  { name: 'Dusty Rose Silk Shawl', category: 'accessory', color: '#d8a7b1', pattern: 'plain', fabric: 'silk', season: 'all', formality: 4, tags: ['modest', 'traditional'], wear: 2, last: '2026-05-01' },
+  { name: 'Silver Wrist Watch', category: 'accessory', subtype: 'watch', color: '#c0c0c0', pattern: 'plain', fabric: 'metal', season: 'all', formality: 3, levels: [2, 3, 4, 5], wear: 14, last: '2026-10-15' },
+  { name: 'Black Leather Belt', category: 'accessory', subtype: 'belt', color: '#1a1a1a', pattern: 'plain', fabric: 'leather', season: 'all', formality: 3, wear: 9, last: '2026-10-10' },
+  { name: 'Dusty Rose Silk Shawl', category: 'accessory', subtype: 'neckwear', color: '#d8a7b1', pattern: 'plain', fabric: 'silk', season: 'all', formality: 4, tags: ['modest', 'traditional'], wear: 2, last: '2026-05-01' },
 ]
 
 export const seedItems: ClothingItem[] = raw.map(build)

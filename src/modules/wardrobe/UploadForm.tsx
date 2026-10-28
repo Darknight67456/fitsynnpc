@@ -56,6 +56,7 @@ export default function UploadForm({ onSaved }: { onSaved: () => void }) {
     e.preventDefault()
     if (!user) return
     if (!file || !shown) { setError('Please choose a photo first.'); return }
+    if (tags.category === 'accessory' && !tags.subtype) { setError('Choose the type of accessory (bag, watch...).'); return }
     setBusy(true)
     setError('')
 
