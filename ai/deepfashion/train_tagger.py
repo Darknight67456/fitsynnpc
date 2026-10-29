@@ -114,17 +114,22 @@ def read_attr_rows(root, wanted_images, n_attrs):
         next(f); next(f)
         for ln in f:
             p = ln.split()
-            if len(p) == n_attrs + 1 and p[0] in wanted:
-                rows[p[0]] = np.array(p[1:], dtype=np.int8)
+            if len(p) >= n_attrs + 1 and p[0] in wanted:
+                try:
+                    rows[p[0]] = np.array(p[-n_attrs:], dtype=np.int8)
+                except ValueError:
+                    continue
                 if len(rows) == len(wanted):
                     break
+    values = Counter(int(v) for r in list(rows.values())[:200] for v in r)
+    print(f'Attribute rows read: {len(rows)} of {len(wanted)} photos. Values seen in the first 200 rows: {dict(values)}')
     return rows
 
 
 def pick_label(row, columns_by_value, priority):
     """The first positive value in priority order, or None when nothing is positive."""
     for value in priority:
-        if any(row[c] == 1 for c in columns_by_value[value]):
+        if any(row[c] > 0 for c in columns_by_value[value]):
             return value
     return None
 
@@ -243,15 +248,14 @@ def main():
     emb = Embedder(a.fake)
     attrs = read_attr_rows(a.root, chosen['train'] + chosen['test'], len(attr_names))
 
-    def build(names):
-        X, ycat, ypat, yfab = [], [], [], []
-        batch, meta = [], []
+    def embed(names):
+        """Embed the photos. Returns the vectors and the names of the photos that could be read."""
+        X, kept, batch, meta = [], [], [], []
         def flush():
             if not batch:
                 return
-            vecs = emb.images(batch)
-            for v, m in zip(vecs, meta):
-                X.append(v); ycat.append(m[0]); ypat.append(m[1]); yfab.append(m[2])
+            for v, m in zip(emb.images(batch), meta):
+                X.append(v); kept.append(m)
             batch.clear(); meta.clear()
         first_error = None
         for k, n in enumerate(names):
@@ -265,10 +269,7 @@ def main():
                     first_error = f'{path}: {type(e).__name__}: {e}'
                     print('  could not open a photo (skipping, will keep trying):', first_error)
                 continue
-            row = attrs.get(n)
-            pat = pick_label(row, pat_cols, list(pat_cols)) if row is not None else None
-            fab = pick_label(row, fab_cols, list(fab_cols)) if row is not None else None
-            meta.append((CATEGORY_OF[cat_names[cat_of_img[n]].lower()], pat if pat else 'plain', fab))
+            meta.append(n)
             if len(batch) == 64:
                 flush()
             if k % 2000 == 0:
@@ -277,12 +278,37 @@ def main():
         if not X:
             raise SystemExit(f'No photos could be read. First problem: {first_error}\n'
                              f'Check --img-root. It must be the folder that contains the "img" folder.')
-        return np.stack(X), np.array(ycat), np.array(ypat), np.array(yfab, dtype=object)
+        return np.stack(X), kept
+
+    def cached_embed(tag, names):
+        """Embedding is the slow part, so keep the result in the output folder and reuse it on a re-run."""
+        os.makedirs(a.out, exist_ok=True)
+        cache = os.path.join(a.out, f'emb_cache_{tag}_{len(names)}_{a.seed}.npz')
+        if os.path.exists(cache):
+            z = np.load(cache, allow_pickle=True)
+            print(f'  reusing saved embeddings: {cache}')
+            return z['X'], list(z['kept'])
+        X, kept = embed(names)
+        np.savez(cache, X=X, kept=np.array(kept, dtype=object))
+        return X, kept
+
+    def labels(kept):
+        ycat, ypat, yfab = [], [], []
+        for n in kept:
+            row = attrs.get(n)
+            pat = pick_label(row, pat_cols, list(pat_cols)) if row is not None else None
+            fab = pick_label(row, fab_cols, list(fab_cols)) if row is not None else None
+            ycat.append(CATEGORY_OF[cat_names[cat_of_img[n]].lower()])
+            ypat.append(pat if pat else 'plain')
+            yfab.append(fab)
+        return np.array(ycat), np.array(ypat), np.array(yfab, dtype=object)
 
     print('\nEmbedding training photos (the slow part)...')
-    Xtr, ctr, ptr, ftr = build(chosen['train'])
+    Xtr, ktr = cached_embed('train', chosen['train'])
     print('Embedding test photos...')
-    Xte, cte, pte, fte = build(chosen['test'])
+    Xte, kte = cached_embed('test', chosen['test'])
+    ctr, ptr, ftr = labels(ktr)
+    cte, pte, fte = labels(kte)
     print(f'train {len(Xtr)}, test {len(Xte)}')
     print('class counts (train):', 'category', dict(Counter(ctr)), '| pattern', dict(Counter(ptr)),
           '| fabric', dict(Counter(f for f in ftr if f)))
@@ -291,8 +317,8 @@ def main():
     for name, ytr, yte, labels_ok in (('category', ctr, cte, None), ('pattern', ptr, pte, None), ('fabric', ftr, fte, 'fabric')):
         tr = np.array([y is not None and y != 'None' for y in ytr])      # fabric: only photos that name a fabric
         te = np.array([y is not None and y != 'None' for y in yte])
-        if tr.sum() < 20 or te.sum() < 5:
-            print(f'Not enough labelled photos for {name}; skipped.')
+        if tr.sum() < 20 or te.sum() < 5 or len(set(ytr[tr].astype(str))) < 2:
+            print(f'Not enough different labels for {name} (need 2 or more kinds); skipped.')
             continue
         clf = LogisticRegression(max_iter=2000, C=2.0, class_weight='balanced')
         clf.fit(Xtr[tr], ytr[tr].astype(str))
