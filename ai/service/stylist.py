@@ -48,7 +48,7 @@ def _to_garment(img, mask, category, subtype):
     out = np.full_like(arr, 255)
     out[mask] = arr[mask]
     crop = Image.fromarray(out).crop((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1))
-    return {'category': category, 'subtype': subtype, 'color': color, 'crop': crop}
+    return {'category': category, 'subtype': subtype, 'color': color, 'crop': crop, 'fraction': float(mask.mean())}
 
 
 def detect_garments(img):

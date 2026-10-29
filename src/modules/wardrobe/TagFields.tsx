@@ -22,7 +22,15 @@ function Choice({ active, onClick, title, hint }: {
   )
 }
 
-export default function TagFields({ value, onChange }: { value: Tags; onChange: (t: Tags) => void }) {
+// A small label shown next to a field the AI filled in. It disappears once the user changes the field.
+function Ai({ on }: { on: boolean }) {
+  return on ? <span className='ml-2 rounded bg-brand/10 px-1.5 py-0.5 text-xs font-normal text-brand'>AI suggestion</span> : null
+}
+
+export default function TagFields({ value, onChange, suggested = [] }: {
+  value: Tags; onChange: (t: Tags) => void; suggested?: string[]
+}) {
+  const ai = (k: string) => suggested.includes(k)
   const set = <K extends keyof Tags>(k: K, v: Tags[K]) => onChange({ ...value, [k]: v })
 
   // Changing the category changes which patterns and materials make sense.
@@ -49,11 +57,11 @@ export default function TagFields({ value, onChange }: { value: Tags; onChange: 
 
   return (
     <div className='space-y-4'>
-      <Input label='Name' required placeholder='e.g. Navy blazer' value={value.name}
+      <Input label={<>Name<Ai on={ai('name')} /></>} required placeholder='e.g. Navy blazer' value={value.name}
         onChange={e => set('name', e.target.value)} />
 
       <div>
-        <span className='mb-1 block text-sm font-medium'>Category</span>
+        <span className='mb-1 block text-sm font-medium'>Category<Ai on={ai('category')} /></span>
         <div className='flex flex-wrap gap-2'>
           {CATEGORIES.map(c => (
             <button key={c.value} type='button' title={c.hint} onClick={() => pickCategory(c.value)}
@@ -70,7 +78,7 @@ export default function TagFields({ value, onChange }: { value: Tags; onChange: 
       </div>
 
       <div>
-        <span className='mb-1 block text-sm font-medium'>Color</span>
+        <span className='mb-1 block text-sm font-medium'>Color<Ai on={ai('color')} /></span>
         <div className='flex items-center gap-3'>
           <input type='color' aria-label='Color' value={value.color} onChange={e => set('color', e.target.value)}
             className='h-10 w-14 cursor-pointer rounded border border-ink/20' />
@@ -81,7 +89,7 @@ export default function TagFields({ value, onChange }: { value: Tags; onChange: 
 
       {value.category === 'accessory' && (
         <div>
-          <span className='mb-1 block text-sm font-medium'>Type of accessory</span>
+          <span className='mb-1 block text-sm font-medium'>Type of accessory<Ai on={ai('subtype')} /></span>
           <div className='flex flex-wrap gap-2'>
             {ACCESSORY_TYPES.map(t => (
               <button key={t.value} type='button' title={t.hint} onClick={() => set('subtype', t.value)}
@@ -96,16 +104,16 @@ export default function TagFields({ value, onChange }: { value: Tags; onChange: 
       )}
 
       <div className='grid grid-cols-2 gap-3'>
-        <Select label='Pattern' value={value.pattern} onChange={e => set('pattern', e.target.value)}>
+        <Select label={<>Pattern<Ai on={ai('pattern')} /></>} value={value.pattern} onChange={e => set('pattern', e.target.value)}>
           {withCurrent(patternsFor(value.category), value.pattern).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </Select>
-        <Select label={materialLabel(value.category)} value={value.fabric} onChange={e => set('fabric', e.target.value)}>
+        <Select label={<>{materialLabel(value.category)}<Ai on={ai('fabric')} /></>} value={value.fabric} onChange={e => set('fabric', e.target.value)}>
           {withCurrent(materialsFor(value.category), value.fabric).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </Select>
       </div>
 
       <div>
-        <span className='mb-1 block text-sm font-medium'>Season (the weather you wear it in)</span>
+        <span className='mb-1 block text-sm font-medium'>Season (the weather you wear it in)<Ai on={ai('season')} /></span>
         <div className='grid grid-cols-2 gap-2'>
           {withCurrent(SEASONS, value.season).map(o => (
             <Choice key={o.value} active={value.season === o.value} title={o.label} hint={o.hint}
@@ -115,7 +123,7 @@ export default function TagFields({ value, onChange }: { value: Tags; onChange: 
       </div>
 
       <div>
-        <span className='mb-1 block text-sm font-medium'>Where would you wear it? (pick every one that fits)</span>
+        <span className='mb-1 block text-sm font-medium'>Where would you wear it? (pick every one that fits)<Ai on={ai('formality_levels')} /></span>
         <div className='grid gap-2 sm:grid-cols-2'>
           {FORMALITY.map(o => (
             <Choice key={o.value} active={value.formality_levels.includes(Number(o.value))} title={o.label} hint={o.hint}

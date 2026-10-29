@@ -11,6 +11,23 @@ export async function embedImage(image: Blob): Promise<Embedding> {
   return res.json() as Promise<Embedding>
 }
 
+export interface TagSuggestion {
+  source: string
+  fields: Record<string, unknown>
+  confidence: Record<string, number>
+  embedding: number[]
+  trained: boolean
+}
+
+// Reads one clothing photo and returns SUGGESTED tags. Nothing is saved.
+export async function suggestTags(photo: Blob): Promise<TagSuggestion> {
+  const body = new FormData()
+  body.append('photo', photo, 'item.jpg')
+  const res = await fetch(`${AI_URL}/tag`, { method: 'POST', body })
+  if (!res.ok) throw new Error('AI service could not read the photo.')
+  return res.json() as Promise<TagSuggestion>
+}
+
 export interface Detected { category: string; subtype: string | null; color: string; image: string }
 export interface Suggestion {
   target: string

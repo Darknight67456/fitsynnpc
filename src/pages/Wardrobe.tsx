@@ -52,7 +52,7 @@ export default function Wardrobe() {
         <Button onClick={() => setShowForm(!showForm)}>{showForm ? 'Close' : 'Add item'}</Button>
       </div>
 
-      {showForm && <UploadForm onSaved={() => { setShowForm(false); void reload() }} />}
+      {showForm && <UploadForm items={items} onSaved={() => { setShowForm(false); void reload() }} />}
 
       <Card className='space-y-3'>
         <Input placeholder='Search by name, fabric or tag...' value={filters.search}

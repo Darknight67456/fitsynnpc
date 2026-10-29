@@ -12,6 +12,7 @@ from pydantic import BaseModel
 import features
 import recommend as R
 import stylist
+import tagger
 
 app = FastAPI(title='FitSync AI')
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv('ALLOW_ORIGINS', '*').split(','),
@@ -255,3 +256,17 @@ async def assist(photo: UploadFile = File(...), prompt: str = Form(''), items: s
                      'picks': [{'item_id': p['item']['id'], 'score': round(p['score'], 3)} for p in r['picks']]}
                     for r in results],
     }
+
+
+@app.post('/tag')
+async def tag(photo: UploadFile = File(...)):
+    """One clothing photo -> suggested tags + its fingerprint. Nothing is saved anywhere."""
+    try:
+        img = Image.open(io.BytesIO(await photo.read())).convert('RGBA')
+    except Exception:
+        raise HTTPException(400, 'Could not read that image.')
+    img = flatten_on_white(img)
+    garments = stylist.detect_garments(img)
+    result = tagger.suggest(img, garments)
+    result['embedding'] = features.embed_images([img])[0].tolist()      # same as /embed, so the site can find similar items
+    return result
