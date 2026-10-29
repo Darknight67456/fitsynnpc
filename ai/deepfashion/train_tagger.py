@@ -93,6 +93,19 @@ def match_attributes(attr_names, words_by_value, wanted_type):
     return out
 
 
+def resolve_img_root(root, sample_name, fake=False):
+    """DeepFashion names photos like img/Some_Dress/img_00000001.jpg. Find the folder that makes that path real."""
+    if fake:
+        return root
+    candidates = [root, os.path.join(root, 'Img'), os.path.join(root, 'img'), os.path.join(root, 'Img', 'Img')]
+    for c in candidates:
+        if os.path.exists(os.path.join(c, sample_name)):
+            print(f'Photos found under: {c}')
+            return c
+    raise SystemExit(f'Could not find {sample_name} under any of: {candidates}\n'
+                     'The photos are probably still uploading to Drive, or --img-root is wrong.')
+
+
 def read_attr_rows(root, wanted_images, n_attrs):
     """Stream the (huge) per-image attribute file and keep only the rows we sampled."""
     wanted = set(wanted_images)
@@ -226,7 +239,7 @@ def main():
         random.shuffle(by_split[s])
     chosen = {'train': by_split['train'][:a.train], 'test': (by_split['test'] or by_split['val'])[:a.test]}
 
-    img_root = a.img_root or a.root
+    img_root = resolve_img_root(a.img_root or a.root, (chosen['train'] or chosen['test'])[0], a.fake)
     emb = Embedder(a.fake)
     attrs = read_attr_rows(a.root, chosen['train'] + chosen['test'], len(attr_names))
 
@@ -240,13 +253,17 @@ def main():
             for v, m in zip(vecs, meta):
                 X.append(v); ycat.append(m[0]); ypat.append(m[1]); yfab.append(m[2])
             batch.clear(); meta.clear()
+        first_error = None
         for k, n in enumerate(names):
             path = os.path.join(img_root, n)
             if a.fake and not os.path.exists(path):
                 continue
             try:
                 batch.append(crop_item(path, bbox[n]))
-            except Exception:
+            except Exception as e:
+                if first_error is None:
+                    first_error = f'{path}: {type(e).__name__}: {e}'
+                    print('  could not open a photo (skipping, will keep trying):', first_error)
                 continue
             row = attrs.get(n)
             pat = pick_label(row, pat_cols, list(pat_cols)) if row is not None else None
@@ -257,6 +274,9 @@ def main():
             if k % 2000 == 0:
                 print(f'  embedded {k}/{len(names)}')
         flush()
+        if not X:
+            raise SystemExit(f'No photos could be read. First problem: {first_error}\n'
+                             f'Check --img-root. It must be the folder that contains the "img" folder.')
         return np.stack(X), np.array(ycat), np.array(ypat), np.array(yfab, dtype=object)
 
     print('\nEmbedding training photos (the slow part)...')
