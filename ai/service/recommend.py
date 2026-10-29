@@ -4,6 +4,8 @@ from itertools import product
 
 import numpy as np
 
+import compat
+
 FORMALITY_NAMES = {1: 'loungewear', 2: 'casual', 3: 'smart casual', 4: 'business', 5: 'formal'}
 SEASON_NAMES = {'hot': 'hot and sunny', 'rainy': 'rainy', 'cool': 'cool or air-con'}
 
@@ -65,11 +67,11 @@ def score_items(items, text_vec, formality, weather):
 
 
 def harmony(parts):
-    """How well the pieces go together. Starts as embedding similarity.
-    Later, replace this ONE function with the trained compatibility model (Task 3)."""
+    """How well the pieces go together: the average pair score from the trained compatibility model
+    (compat.joblib), or plain photo similarity when that file is not there."""
     if len(parts) < 2:
         return 1.0
-    sims = [float(np.dot(a['embedding'], b['embedding'])) for k, a in enumerate(parts) for b in parts[k + 1:]]
+    sims = [compat.pair_score(a['embedding'], b['embedding']) for k, a in enumerate(parts) for b in parts[k + 1:]]
     return float(np.mean(sims))
 
 
@@ -138,7 +140,7 @@ def build_outfits(items, scores, weather, outerwear='auto', accessories=(), top_
     for c in chosen:                                   # add the best item of each wanted accessory type
         for t in wanted:
             def fit(a, parts=c['parts']):
-                sims = [float(np.dot(a['embedding'], p['embedding'])) for p in parts]
+                sims = [compat.pair_score(a['embedding'], p['embedding']) for p in parts]
                 return 0.7 * scores[a['id']] + 0.3 * float(np.mean(sims)) - (0.15 if a['id'] in used else 0)
             pick = max(acc_by_type[t], key=fit)        # the small penalty gives each outfit a different one when possible
             used.add(pick['id'])
