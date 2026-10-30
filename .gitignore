@@ -34,6 +34,7 @@ ai/data/
 *.npy
 *.csv
 
-# saved embeddings from training (big, can be re-made). The trained *.joblib models are NOT ignored.
+# trained models stay on your computer; they are uploaded by gcloud on deploy, not by git
+*.joblib
 emb_cache_*.npz
 polyvore_emb_*.npz
