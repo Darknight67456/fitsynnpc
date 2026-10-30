@@ -6,7 +6,8 @@ How it works:
   2. Fashion-CLIP turns the garment into a fingerprint.
   3. If a trained model (tagger.joblib, trained on DeepFashion) is present, it decides category, pattern and fabric
      for clothing. If not, Fashion-CLIP compares the fingerprint with written descriptions (zero-shot).
-  4. Shoes and accessories are not in DeepFashion, so they always use the detector and zero-shot.
+  4. Shoes and accessories are not in DeepFashion. When itemtype.joblib (trained on Polyvore) is present it decides the
+     category, including shoes and accessories, and the accessory type; otherwise they use the detector and zero-shot.
 """
 import os
 from functools import lru_cache
@@ -18,7 +19,9 @@ import recommend as R
 import stylist
 
 MODEL_PATH = os.getenv('TAGGER_PATH', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tagger.joblib'))
+ITEMTYPE_PATH = os.getenv('ITEMTYPE_PATH', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'itemtype.joblib'))
 MIN_CONFIDENCE = float(os.getenv('TAG_MIN_CONFIDENCE', '0.3'))
+MIN_TYPE_CONFIDENCE = float(os.getenv('TAG_MIN_TYPE_CONFIDENCE', '0.45'))
 
 CLOTHING = ['top', 'bottom', 'dress', 'outerwear']
 CATEGORY_PROMPTS = {
@@ -79,6 +82,28 @@ def trained_model():
         return None
 
 
+@lru_cache(maxsize=1)
+def itemtype_model():
+    """The Polyvore-trained 'what kind of item' classifiers (category incl. shoes/accessories, accessory type), or None."""
+    if not os.path.exists(ITEMTYPE_PATH):
+        return None
+    try:
+        import joblib
+        return joblib.load(ITEMTYPE_PATH)['models']
+    except Exception:
+        return None
+
+
+def _itemtype_choice(name, vec):
+    models = itemtype_model()
+    if not models or name not in models:
+        return None
+    clf = models[name]
+    proba = clf.predict_proba(vec.reshape(1, -1))[0]
+    k = int(np.argmax(proba))
+    return str(clf.classes_[k]), float(proba[k])
+
+
 @lru_cache(maxsize=64)
 def _text_vecs(texts):
     return features.embed_text(list(texts))
@@ -136,7 +161,19 @@ def suggest(img, garments):
             out['confidence'][field] = round(conf, 2)
 
     # category (and accessory type)
-    if main and main['category'] in ('shoes', 'accessory'):
+    typed = _itemtype_choice('category', vec)                    # trained on Polyvore: knows shoes and accessories too
+    if typed and typed[1] >= MIN_TYPE_CONFIDENCE:
+        category, conf = typed
+        subtype = None
+        if category == 'accessory':
+            sub = _itemtype_choice('accessory_type', vec)
+            if sub and sub[1] >= MIN_TYPE_CONFIDENCE:
+                subtype = sub[0]
+        elif category in CLOTHING:
+            tr = _trained_choice('category', vec, set(CLOTHING))     # DeepFashion model refines the four clothing kinds
+            if tr:
+                category, conf = tr
+    elif main and main['category'] in ('shoes', 'accessory'):
         category, conf = main['category'], 0.9
         subtype = main['subtype']
     else:
@@ -175,5 +212,5 @@ def suggest(img, garments):
 
     if main:
         out['fields']['color'] = main['color']
-    out['trained'] = bool(trained_model())
+    out['trained'] = bool(trained_model() or itemtype_model())
     return out
