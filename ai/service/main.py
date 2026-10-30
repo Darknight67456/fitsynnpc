@@ -338,3 +338,46 @@ async def undertone(photo: UploadFile = File(...)):
     return {'undertone': kind, 'confidence': round(confidence, 2), 'part': part,
             'color': '#%02x%02x%02x' % tuple(int(v) for v in rgb),
             'message': 'Lighting and camera color change this a lot, so check it against how you know your own skin.'}
+
+
+@app.post('/color-selfie')
+async def color_selfie(photo: UploadFile = File(...), undertone: str = Form(''), use_selfie_undertone: bool = Form(True),
+                       items: str = Form('[]')):
+    """A selfie -> the pieces being worn, the skin undertone, and a color verdict on the outfit with the person."""
+    try:
+        img = Image.open(io.BytesIO(await photo.read())).convert('RGB')
+        wardrobe = json.loads(items)
+    except Exception:
+        raise HTTPException(400, 'Could not read the photo.')
+    info = stylist.analyze_person(img)
+    if not info['person'] or not info['garments']:
+        return {'message': 'I could not see a person wearing clothes. Use a photo of yourself with your outfit in view, in good light.',
+                'pieces': []}
+
+    chosen = _undertone(undertone)
+    est = None
+    if info['skin_rgb'] is not None:
+        kind, conf, _ = colortheory.undertone_from_rgb(info['skin_rgb'])
+        est = {'value': kind, 'confidence': round(conf, 2), 'color': '#%02x%02x%02x' % tuple(int(v) for v in info['skin_rgb'])}
+    if use_selfie_undertone and est and est['confidence'] >= 0.5:
+        used, source = est['value'], 'selfie'
+    else:
+        used, source = chosen, 'chosen'
+
+    pieces = info['garments']
+    check_items = [{'id': str(i), 'color': g['color'], 'category': g['category'], 'subtype': g['subtype']} for i, g in enumerate(pieces)]
+    verdict = colortheory.check_outfit(check_items, used)
+    weakest, swaps = None, []
+    if verdict['weakest']:
+        k = int(verdict['weakest']['item_id'])
+        weakest = {'index': k, 'gain_if_removed': verdict['weakest']['gain_if_removed']}
+        swaps = colortheory.suggest_swaps(check_items, k, wardrobe, used)
+    return {
+        'message': '', 'score': verdict['score'], 'scheme': verdict['scheme'], 'reason': verdict['reason'],
+        'undertone': {'used': used, 'source': source, 'estimate': est},
+        'pieces': [{'category': g['category'], 'subtype': g['subtype'], 'color': g['color'],
+                    'image': stylist.thumbnail_data_uri(g['crop']),
+                    'fit': colortheory.fit_label(g['color'], used) if g['category'] in colortheory.NEAR_FACE else None}
+                   for g in pieces],
+        'weakest': weakest, 'swaps': swaps,
+    }

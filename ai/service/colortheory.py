@@ -243,3 +243,31 @@ def undertone_from_rgb(rgb):
         return 'warm', min(1.0, 0.5 + (hue - WARM_ABOVE) / 20), hue
     mid = (COOL_BELOW + WARM_ABOVE) / 2
     return 'neutral', max(0.3, 1 - abs(hue - mid) / 4), hue
+
+
+def fit_label(hex_color, undertone):
+    """A short note on how one color near the face suits a skin undertone: 'suits', 'neutral' or 'less flattering'."""
+    if undertone not in ('warm', 'cool') or is_neutral(hex_color):
+        return 'neutral'
+    f = undertone_fit(hex_color, undertone)
+    return 'suits' if f >= 0.35 else 'less flattering' if f <= -0.35 else 'neutral'
+
+
+def suggest_swaps(items, weak_index, candidates, undertone=None, n=3):
+    """The piece at weak_index hurts the outfit. Which wardrobe items of the same kind would score better instead?"""
+    weak = items[weak_index]
+    colors = [i['color'] for i in items]
+    cats = [i.get('category') for i in items]
+    current = score_palette(colors, cats, undertone)['score']
+    rows = []
+    for c in candidates:
+        if not valid_hex(c.get('color', '')) or c.get('category') != weak.get('category'):
+            continue
+        if weak.get('category') == 'accessory' and c.get('subtype') != weak.get('subtype'):
+            continue
+        trial = colors[:weak_index] + [c['color']] + colors[weak_index + 1:]
+        score = score_palette(trial, cats, undertone)['score']
+        if score >= current + 3:
+            rows.append({'item_id': c['id'], 'score': score})
+    rows.sort(key=lambda r: -r['score'])
+    return rows[:n]

@@ -106,3 +106,27 @@ export async function detectUndertone(photo: Blob): Promise<UndertoneResult> {
   if (!res.ok) throw new Error('The AI service could not read the photo.')
   return res.json() as Promise<UndertoneResult>
 }
+
+export interface SelfiePiece { category: string; subtype: string | null; color: string; image: string; fit: 'suits' | 'neutral' | 'less flattering' | null }
+export interface ColorSelfieResult {
+  message: string
+  pieces: SelfiePiece[]
+  score?: number
+  scheme?: string
+  reason?: string
+  undertone?: { used: Undertone | null; source: 'selfie' | 'chosen'; estimate: { value: Undertone; confidence: number; color: string } | null }
+  weakest?: { index: number; gain_if_removed: number } | null
+  swaps?: { item_id: string; score: number }[]
+}
+
+// A selfie -> the pieces worn, the skin undertone, and a color verdict on the outfit with the person.
+export async function colorSelfie(photo: Blob, undertone: Undertone | null, useSelfieUndertone: boolean, wardrobe: ColorPayload[]) {
+  const body = new FormData()
+  body.append('photo', photo, 'selfie.jpg')
+  body.append('undertone', undertone ?? '')
+  body.append('use_selfie_undertone', String(useSelfieUndertone))
+  body.append('items', JSON.stringify(wardrobe.map(({ id, color, category, subtype }) => ({ id, color, category, subtype }))))
+  const res = await fetch(`${AI_URL}/color-selfie`, { method: 'POST', body })
+  if (!res.ok) throw new Error('The AI service could not read the photo.')
+  return res.json() as Promise<ColorSelfieResult>
+}

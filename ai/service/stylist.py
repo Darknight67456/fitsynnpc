@@ -55,9 +55,8 @@ PERSON_LABELS = ('Face', 'Hair', 'Left-arm', 'Right-arm', 'Left-leg', 'Right-leg
 MIN_PERSON_FRACTION = 0.01             # share of the photo that must be face, hair, arms or legs to count as "a person"
 
 
-def analyze(img):
-    """Photo -> (garments found, whether a person is in the photo).
-    A photo of one item (a watch on a table, shoes on white) has no person, and the clothes detector is unreliable there."""
+def _read(img):
+    """One pass of the clothes detector over a photo. Returns (resized photo, garments, person?, skin rgb, skin part)."""
     img = img.convert('RGB')
     img.thumbnail((MAX_SIDE, MAX_SIDE))
     seg, names = segment(img)
@@ -72,21 +71,13 @@ def analyze(img):
     for (category, subtype), mask in groups.items():
         if mask.mean() >= MIN_FRACTION[category]:
             found.append(_to_garment(img, mask, category, subtype))
-    return found, person >= MIN_PERSON_FRACTION
+    rgb, part = _skin_from(np.asarray(img), seg, names)
+    return img, found, person >= MIN_PERSON_FRACTION, rgb, part
 
 
-def detect_garments(img):
-    """Photo of a person -> list of the garments and accessories found."""
-    return analyze(img)[0]
-
-
-def skin_color(img):
-    """Typical skin color (r, g, b) from a selfie, using the face (or arms when no face is found).
-    Returns (rgb or None, which part was used). Dark shadows, bright highlights, lips and eyes are trimmed away."""
-    img = img.convert('RGB')
-    img.thumbnail((MAX_SIDE, MAX_SIDE))
-    seg, names = segment(img)
-    arr = np.asarray(img)
+def _skin_from(arr, seg, names):
+    """Typical skin color (r, g, b) from the face (or arms when no face is found), and which part was used.
+    Dark shadows, bright highlights, lips and eyes are trimmed away."""
     for part, wanted in (('face', ('Face',)), ('arms', ('Left-arm', 'Right-arm'))):
         ids = [int(i) for i, n in names.items() if n in wanted]
         mask = np.isin(seg, ids) if ids else np.zeros(seg.shape, bool)
@@ -99,6 +90,30 @@ def skin_color(img):
         if len(keep):
             return tuple(float(v) for v in np.median(keep, axis=0)), part
     return None, None
+
+
+def analyze(img):
+    """Photo -> (garments found, whether a person is in the photo).
+    A photo of one item (a watch on a table, shoes on white) has no person, and the clothes detector is unreliable there."""
+    _, found, person, _, _ = _read(img)
+    return found, person
+
+
+def analyze_person(img):
+    """Photo of a person -> {'garments', 'person', 'skin_rgb', 'skin_part'} from a single pass of the detector."""
+    _, found, person, rgb, part = _read(img)
+    return {'garments': found, 'person': person, 'skin_rgb': rgb, 'skin_part': part}
+
+
+def detect_garments(img):
+    """Photo of a person -> list of the garments and accessories found."""
+    return analyze(img)[0]
+
+
+def skin_color(img):
+    """Typical skin color (r, g, b) from a selfie. Returns (rgb or None, which part was used)."""
+    _, _, _, rgb, part = _read(img)
+    return rgb, part
 
 
 def thumbnail_data_uri(crop, size=160):
