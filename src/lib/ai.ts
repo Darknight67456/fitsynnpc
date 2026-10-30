@@ -39,6 +39,7 @@ export interface AssistResult {
   targets: Suggestion[]
   formality: number | null
   message: string
+  mode?: 'person' | 'item'      // 'item' = the photo shows one piece, not a person wearing clothes
 }
 
 export async function assist(photo: Blob, prompt: string, items: object[]): Promise<AssistResult> {

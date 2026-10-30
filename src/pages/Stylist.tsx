@@ -57,8 +57,9 @@ export default function Stylist() {
       <div>
         <h1 className='text-2xl font-bold'>Ask the stylist</h1>
         <p className='text-sm text-muted'>
-          Take a photo of what you are wearing and ask what goes with it. The AI finds your shirt, bottom, shoes and
-          accessories in the photo, then picks matching pieces from your wardrobe.
+          Take a photo of what you are wearing, or of a single piece like a watch or a pair of shoes, and ask what goes
+          with it. The AI finds the top, bottom, one-piece, shoes and accessories in the photo, then picks matching
+          pieces from your wardrobe.
         </p>
       </div>
 
@@ -98,7 +99,7 @@ export default function Stylist() {
 
           {result.detected.length > 0 && (
             <Card className='space-y-2'>
-              <p className='font-semibold'>What I see you wearing</p>
+              <p className='font-semibold'>{result.mode === 'item' ? 'What I see in your photo' : 'What I see you wearing'}</p>
               <div className='flex flex-wrap gap-3'>
                 {result.detected.map((d, i) => (
                   <div key={i} className='w-24 text-center text-xs'>

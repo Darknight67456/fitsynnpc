@@ -160,6 +160,23 @@ def refine_garment(g):
     return g
 
 
+def single_item(img):
+    """A photo of ONE item (no person in it) -> that item as a 'garment' dict, or None when the AI cannot tell what it is.
+    Uses the same models as the wardrobe tag suggestions, on the whole picture."""
+    import numpy as np
+    img = img.convert('RGB')
+    guess = suggest(img, [])
+    category = guess['fields'].get('category')
+    if not category:
+        return None
+    arr = np.asarray(img)
+    ink = arr[(arr < 235).any(axis=2)]                       # ignore the white background when finding the color
+    pixels = ink if len(ink) > 50 else arr.reshape(-1, 3)
+    color = '#%02x%02x%02x' % tuple(int(v) for v in np.median(pixels, axis=0))
+    crop = img.copy()
+    return {'category': category, 'subtype': guess['fields'].get('subtype'), 'color': color, 'crop': crop, 'fraction': 1.0}
+
+
 def pick_main_garment(garments):
     """The piece to describe: the biggest clothing piece in the photo, else the biggest anything."""
     usable = [g for g in garments if g['fraction'] >= 0.1]

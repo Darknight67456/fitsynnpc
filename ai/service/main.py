@@ -222,9 +222,14 @@ async def assist(photo: UploadFile = File(...), prompt: str = Form(''), items: s
     for i in wardrobe:
         i['embedding'] = np.array(i['embedding'], dtype=np.float32)
 
-    garments = stylist.detect_garments(img)
+    garments, is_person = stylist.analyze(img)
+    mode = 'person'
+    if not is_person:                                  # a photo of one item: classify the whole picture instead
+        one = tagger.single_item(img)
+        if one:
+            garments, mode = [one], 'item'
     if not garments:
-        return {'detected': [], 'targets': [], 'formality': None, 'message':
+        return {'detected': [], 'targets': [], 'formality': None, 'mode': mode, 'message':
                 'I could not see any clothes. Try a clear photo with your whole outfit in view and good light.'}
     for g, v in zip(garments, features.embed_images([g['crop'] for g in garments])):
         g['embedding'] = v
@@ -252,7 +257,7 @@ async def assist(photo: UploadFile = File(...), prompt: str = Form(''), items: s
     reason_of = {id(r): why for r, why in zip(shown, reasons)}
 
     return {
-        'formality': round(formality, 1), 'event': event, 'message': '',
+        'formality': round(formality, 1), 'event': event, 'message': '', 'mode': mode,
         'detected': [{'category': g['category'], 'subtype': g['subtype'], 'color': g['color'],
                       'image': stylist.thumbnail_data_uri(g['crop'])} for g in garments],
         'targets': [{'target': r['target'], 'reason': reason_of.get(id(r), ''),

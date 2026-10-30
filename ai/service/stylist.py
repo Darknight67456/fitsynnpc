@@ -51,11 +51,18 @@ def _to_garment(img, mask, category, subtype):
     return {'category': category, 'subtype': subtype, 'color': color, 'crop': crop, 'fraction': float(mask.mean())}
 
 
-def detect_garments(img):
-    """Photo of a person -> list of the garments and accessories found."""
+PERSON_LABELS = ('Face', 'Hair', 'Left-arm', 'Right-arm', 'Left-leg', 'Right-leg')
+MIN_PERSON_FRACTION = 0.01             # share of the photo that must be face, hair, arms or legs to count as "a person"
+
+
+def analyze(img):
+    """Photo -> (garments found, whether a person is in the photo).
+    A photo of one item (a watch on a table, shoes on white) has no person, and the clothes detector is unreliable there."""
     img = img.convert('RGB')
     img.thumbnail((MAX_SIDE, MAX_SIDE))
     seg, names = segment(img)
+    person_ids = [int(i) for i, n in names.items() if n in PERSON_LABELS]
+    person = float(np.isin(seg, person_ids).mean()) if person_ids else 0.0
     groups = {}                                        # (category, subtype) -> mask, so left and right shoes join
     for cid, name in names.items():
         if name in LABELS or name.title() in LABELS:             # tolerate small spelling differences in label names
@@ -65,7 +72,12 @@ def detect_garments(img):
     for (category, subtype), mask in groups.items():
         if mask.mean() >= MIN_FRACTION[category]:
             found.append(_to_garment(img, mask, category, subtype))
-    return found
+    return found, person >= MIN_PERSON_FRACTION
+
+
+def detect_garments(img):
+    """Photo of a person -> list of the garments and accessories found."""
+    return analyze(img)[0]
 
 
 def skin_color(img):
