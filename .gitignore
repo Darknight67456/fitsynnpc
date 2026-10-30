@@ -33,3 +33,8 @@ ai/data/
 *.zip
 *.npy
 *.csv
+
+# trained models: too big/personal to commit; copy them into ai/service/ before deploying
+*.joblib
+emb_cache_*.npz
+polyvore_emb_*.npz
