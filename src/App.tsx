@@ -7,6 +7,7 @@ import Wardrobe from './pages/Wardrobe'
 import Visualizer from './pages/Visualizer'
 import Outfits from './pages/Outfits'
 import Stylist from './pages/Stylist'
+import Colors from './pages/Colors'
 import ComingSoon from './pages/ComingSoon'
 
 export default function App() {
@@ -19,7 +20,7 @@ export default function App() {
             <Route path='/' element={<Wardrobe />} />
             <Route path='/outfits' element={<Outfits />} />
             <Route path='/stylist' element={<Stylist />} />
-            <Route path='/colors' element={<ComingSoon title='Colors' />} />
+            <Route path='/colors' element={<Colors />} />
             <Route path='/visualizer' element={<Visualizer />} />
             <Route path='/size' element={<ComingSoon title='Size and fit' />} />
             <Route path='/insights' element={<ComingSoon title='Insights' />} />

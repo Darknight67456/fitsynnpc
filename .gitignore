@@ -33,3 +33,8 @@ ai/data/
 *.zip
 *.npy
 *.csv
+
+# trained models stay on your computer; they are uploaded by gcloud on deploy, not by git
+*.joblib
+emb_cache_*.npz
+polyvore_emb_*.npz

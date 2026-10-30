@@ -1,0 +1,9 @@
+# What `gcloud run deploy --source .` uploads from the ai folder.
+# Trained models (*.joblib) are uploaded on deploy; do not add them here.
+.git
+.gitignore
+.venv/
+__pycache__/
+*.pyc
+notebooks/
+*.ipynb
