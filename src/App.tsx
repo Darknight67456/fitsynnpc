@@ -3,6 +3,7 @@ import { AuthProvider } from './lib/auth'
 import Protected from './components/Protected'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import ResetPassword from './pages/ResetPassword'
 import Wardrobe from './pages/Wardrobe'
 import Visualizer from './pages/Visualizer'
 import Outfits from './pages/Outfits'
@@ -16,6 +17,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path='/login' element={<Login />} />
+          <Route path='/reset-password' element={<ResetPassword />} />
           <Route element={<Protected><Layout /></Protected>}>
             <Route path='/' element={<Wardrobe />} />
             <Route path='/outfits' element={<Outfits />} />
