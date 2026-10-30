@@ -68,6 +68,27 @@ def detect_garments(img):
     return found
 
 
+def skin_color(img):
+    """Typical skin color (r, g, b) from a selfie, using the face (or arms when no face is found).
+    Returns (rgb or None, which part was used). Dark shadows, bright highlights, lips and eyes are trimmed away."""
+    img = img.convert('RGB')
+    img.thumbnail((MAX_SIDE, MAX_SIDE))
+    seg, names = segment(img)
+    arr = np.asarray(img)
+    for part, wanted in (('face', ('Face',)), ('arms', ('Left-arm', 'Right-arm'))):
+        ids = [int(i) for i, n in names.items() if n in wanted]
+        mask = np.isin(seg, ids) if ids else np.zeros(seg.shape, bool)
+        if mask.sum() < 200:
+            continue
+        px = arr[mask].astype(float)
+        lum = px @ np.array([0.299, 0.587, 0.114])
+        lo, hi = np.percentile(lum, [25, 75])
+        keep = px[(lum >= lo) & (lum <= hi)]
+        if len(keep):
+            return tuple(float(v) for v in np.median(keep, axis=0)), part
+    return None, None
+
+
 def thumbnail_data_uri(crop, size=160):
     crop = crop.copy()
     crop.thumbnail((size, size))

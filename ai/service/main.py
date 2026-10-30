@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from pydantic import BaseModel
 
+import colortheory
+import compat
 import features
 import recommend as R
 import stylist
@@ -270,3 +272,63 @@ async def tag(photo: UploadFile = File(...)):
     result = tagger.suggest(img, garments)
     result['embedding'] = features.embed_images([img])[0].tolist()      # same as /embed, so the site can find similar items
     return result
+
+
+# ---------------- Module 3: color theory ----------------
+
+class ColorItem(BaseModel):
+    id: str
+    color: str
+    category: str = ''
+    subtype: str | None = None
+    embedding: list[float] | None = None
+
+
+class ColorMatchRequest(BaseModel):
+    anchor: ColorItem
+    candidates: list[ColorItem]
+    undertone: str | None = None
+    per_group: int = 3
+
+
+class ColorCheckRequest(BaseModel):
+    items: list[ColorItem]
+    undertone: str | None = None
+
+
+def _undertone(value):
+    return value if value in ('warm', 'cool', 'neutral') else None
+
+
+@app.post('/color-match')
+def color_match(req: ColorMatchRequest):
+    """One item -> the best color partners from the wardrobe, grouped by kind, each with a score and a reason."""
+    style_fn = compat.pair_score if compat.available() else None
+    groups = colortheory.match(req.anchor.model_dump(), [c.model_dump() for c in req.candidates],
+                               _undertone(req.undertone), max(1, min(req.per_group, 6)), style_fn)
+    return {'groups': groups, 'learned_score': style_fn is not None}
+
+
+@app.post('/color-score')
+def color_score(req: ColorCheckRequest):
+    """2 to 5 items -> one color score, the scheme, a reason, and the piece that hurts the harmony most."""
+    items = [i.model_dump() for i in req.items][:5]
+    if len(items) < 2:
+        raise HTTPException(400, 'Choose at least 2 items.')
+    return colortheory.check_outfit(items, _undertone(req.undertone))
+
+
+@app.post('/undertone')
+async def undertone(photo: UploadFile = File(...)):
+    """A selfie -> a guess at skin undertone. Lighting changes it a lot, so the website lets the user correct it."""
+    try:
+        img = Image.open(io.BytesIO(await photo.read())).convert('RGB')
+    except Exception:
+        raise HTTPException(400, 'Could not read that image.')
+    rgb, part = stylist.skin_color(img)
+    if rgb is None:
+        return {'undertone': None, 'message': 'I could not find a face or skin in that photo. Try a closer photo in daylight.'}
+    kind, confidence, _ = colortheory.undertone_from_rgb(rgb)
+    return {'undertone': kind, 'confidence': round(confidence, 2), 'part': part,
+            'color': '#%02x%02x%02x' % tuple(int(v) for v in rgb),
+            'message': 'Lighting and camera color change this a lot, so check it against how you know your own skin.'}

@@ -68,3 +68,40 @@ export async function recommend(args: {
   if (!res.ok) throw new Error('The AI service returned an error.')
   return res.json() as Promise<RecommendResult>
 }
+
+// ---------------- Module 3: color theory ----------------
+export type Undertone = 'warm' | 'cool' | 'neutral'
+
+export interface ColorPayload { id: string; color: string; category: string; subtype?: string | null; embedding?: number[] | null }
+export interface ColorPick { item_id: string; score: number; color_score: number; style_score: number | null; scheme: string; reason: string }
+export interface ColorGroup { group: string; category: string; picks: ColorPick[] }
+export interface ColorMatchResult { groups: ColorGroup[]; learned_score: boolean }
+export interface ColorCheckResult {
+  score: number
+  scheme: string
+  reason: string
+  weakest: { item_id: string | null; gain_if_removed: number } | null
+}
+export interface UndertoneResult { undertone: Undertone | null; confidence?: number; part?: string; color?: string; message: string }
+
+async function postJson<T>(path: string, body: object): Promise<T> {
+  const res = await fetch(`${AI_URL}${path}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error('The AI service returned an error.')
+  return res.json() as Promise<T>
+}
+
+export const colorMatch = (anchor: ColorPayload, candidates: ColorPayload[], undertone: Undertone | null) =>
+  postJson<ColorMatchResult>('/color-match', { anchor, candidates, undertone })
+
+export const colorCheck = (items: ColorPayload[], undertone: Undertone | null) =>
+  postJson<ColorCheckResult>('/color-score', { items, undertone })
+
+export async function detectUndertone(photo: Blob): Promise<UndertoneResult> {
+  const body = new FormData()
+  body.append('photo', photo, 'selfie.jpg')
+  const res = await fetch(`${AI_URL}/undertone`, { method: 'POST', body })
+  if (!res.ok) throw new Error('The AI service could not read the photo.')
+  return res.json() as Promise<UndertoneResult>
+}
