@@ -139,6 +139,27 @@ def _trained_choice(name, vec, allowed):
     return str(best[0]), best[1] / total
 
 
+# A piece found in a photo of a person may only be re-labeled within these kinds, so a wrong guess cannot turn shoes into a dress.
+FAMILY = {'top': {'top', 'outerwear', 'dress'}, 'bottom': {'bottom'}, 'dress': {'dress', 'top'},
+          'shoes': {'shoes'}, 'accessory': {'accessory'}}
+REFINE_MIN_CONFIDENCE = float(os.getenv('REFINE_MIN_CONFIDENCE', '0.6'))
+
+
+def refine_garment(g):
+    """Double-check a piece cut out of a photo of a person with the trained item-type model.
+    The cut-out comes from the clothes detector; this fixes jackets labeled as tops, dresses labeled as tops, and so on.
+    It only changes the label when it is confident and the new label is in the same family. Needs g['embedding']."""
+    typed = _itemtype_choice('category', g['embedding'])
+    if typed and typed[1] >= REFINE_MIN_CONFIDENCE and typed[0] != g['category'] and typed[0] in FAMILY.get(g['category'], set()):
+        g['category'], g['subtype'] = typed[0], None
+        g['refined'] = True
+    if g['category'] == 'accessory' and not g.get('subtype'):
+        sub = _itemtype_choice('accessory_type', g['embedding'])
+        if sub and sub[1] >= 0.7:
+            g['subtype'] = sub[0]
+    return g
+
+
 def pick_main_garment(garments):
     """The piece to describe: the biggest clothing piece in the photo, else the biggest anything."""
     usable = [g for g in garments if g['fraction'] >= 0.1]

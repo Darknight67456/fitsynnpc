@@ -228,6 +228,7 @@ async def assist(photo: UploadFile = File(...), prompt: str = Form(''), items: s
                 'I could not see any clothes. Try a clear photo with your whole outfit in view and good light.'}
     for g, v in zip(garments, features.embed_images([g['crop'] for g in garments])):
         g['embedding'] = v
+        tagger.refine_garment(g)                      # trained model double-checks top / jacket / dress / accessory type
 
     fv = features.embed_text(R.FORMALITY_PROMPTS)
     body = [g for g in garments if g['category'] != 'accessory'] or garments
