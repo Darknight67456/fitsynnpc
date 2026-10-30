@@ -34,7 +34,6 @@ ai/data/
 *.npy
 *.csv
 
-# trained models: too big/personal to commit; copy them into ai/service/ before deploying
-*.joblib
+# saved embeddings from training (big, can be re-made). The trained *.joblib models are NOT ignored.
 emb_cache_*.npz
 polyvore_emb_*.npz
