@@ -32,8 +32,11 @@ export default function Stylist() {
   const ready = items.filter(i => Array.isArray(i.embedding) && i.embedding.length > 0)
   const byId = new Map(items.map(i => [i.id, i]))
 
+  const canSend = !!photo && prompt.trim().length > 0          // both a photo and a question are needed
+
   async function ask() {
     if (!photo) { setError('Take or choose a photo first.'); return }
+    if (!prompt.trim()) { setError('Type a question first, or tap one of the examples.'); return }
     setError('')
     setResult(null)
     setBusy(true)
@@ -63,7 +66,7 @@ export default function Stylist() {
         <SelfieCapture onPhoto={p => { setPhoto(p); setResult(null) }} />
         {preview && <img src={preview} alt='your photo' className='max-h-72 rounded-lg' />}
 
-        <textarea rows={2} value={prompt} onChange={e => setPrompt(e.target.value)}
+        <textarea rows={2} required aria-required='true' value={prompt} onChange={e => setPrompt(e.target.value)}
           placeholder='Ask anything, e.g. what bottom fits this shirt?'
           className='w-full rounded-lg border border-ink/20 bg-surface p-2 text-sm focus:border-brand focus:outline-none' />
         <div className='flex flex-wrap gap-2'>
@@ -72,7 +75,12 @@ export default function Stylist() {
               className='rounded-full border border-ink/20 px-3 py-1 text-sm hover:bg-ink/5'>{q}</button>
           ))}
         </div>
-        <Button onClick={() => void ask()} disabled={busy || ready.length === 0}>{busy ? 'Looking...' : 'Ask'}</Button>
+        <Button onClick={() => void ask()} disabled={busy || ready.length === 0 || !canSend}>{busy ? 'Looking...' : 'Send'}</Button>
+        {!canSend && ready.length > 0 && (
+          <p className='text-sm text-muted'>
+            To send, {!photo && prompt.trim() ? 'add a photo.' : photo ? 'type a question.' : 'add a photo and type a question.'}
+          </p>
+        )}
         {ready.length === 0 && (
           <p className='text-sm text-muted'>No wardrobe item is ready for the AI yet. Open Outfits and press Prepare first.</p>
         )}
