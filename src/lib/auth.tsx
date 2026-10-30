@@ -15,7 +15,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
     })
     // runs again whenever the user logs in or out
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => setSession(s))
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      setSession(s)
+      // Someone opened a "reset your password" email link. Whatever page it landed on, show the new-password form.
+      if (event === 'PASSWORD_RECOVERY' && window.location.pathname !== '/reset-password') {
+        window.location.replace('/reset-password')
+      }
+    })
     return () => sub.subscription.unsubscribe()
   }, [])
 
