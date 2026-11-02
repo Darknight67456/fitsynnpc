@@ -58,7 +58,7 @@ export default function SelfieCapture({ onPhoto }: { onPhoto: (photo: Blob) => v
           <Button type='button' onClick={() => void start()}>Open camera</Button>
           <label className='cursor-pointer rounded-lg border border-ink/20 bg-surface px-4 py-2 text-sm font-semibold hover:bg-ink/5'>
             Choose a photo
-            <input type='file' accept='image/*' capture='user' className='hidden'
+            <input type='file' accept='image/*' className='hidden'
               onChange={e => { const f = e.target.files?.[0]; if (f) onPhoto(f); e.target.value = '' }} />
           </label>
         </div>

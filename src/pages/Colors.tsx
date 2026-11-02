@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  colorCheck, colorMatch, detectUndertone,
-  type ColorCheckResult, type ColorMatchResult, type ColorPayload, type Undertone, type UndertoneResult,
+  colorCheck, colorMatch, colorSelfie, detectUndertone,
+  type ColorCheckResult, type ColorMatchResult, type ColorPayload, type ColorSelfieResult, type Undertone, type UndertoneResult,
 } from '../lib/ai'
 import { useWardrobe } from '../modules/wardrobe/useWardrobe'
 import { useBodyProfile } from '../modules/profile/useBodyProfile'
@@ -66,7 +66,7 @@ export default function Colors() {
   const [chosenUndertone, setChosenUndertone] = useState<Undertone | null>(null)
   const undertone: Undertone = chosenUndertone ?? (profileLoading ? 'neutral' : profile.skin_undertone)
 
-  const [tab, setTab] = useState<'match' | 'check'>('match')
+  const [tab, setTab] = useState<'match' | 'check' | 'selfie'>('match')
   const [anchorId, setAnchorId] = useState('')
   const [match, setMatch] = useState<ColorMatchResult | null>(null)
   const [picked, setPicked] = useState<string[]>([])
@@ -120,6 +120,37 @@ export default function Colors() {
       setError(e instanceof Error ? `${e.message} Is the AI service running?` : 'Something went wrong.')
     }
     setBusy(false)
+  }
+
+  // Judge my outfit: a selfie of the person wearing the clothes
+  const [outfitPhoto, setOutfitPhoto] = useState<Blob | null>(null)
+  const outfitUrl = useMemo(() => (outfitPhoto ? URL.createObjectURL(outfitPhoto) : ''), [outfitPhoto])
+  useEffect(() => () => { if (outfitUrl) URL.revokeObjectURL(outfitUrl) }, [outfitUrl])
+  const [useSelfieSkin, setUseSelfieSkin] = useState(true)
+  const [judge, setJudge] = useState<ColorSelfieResult | null>(null)
+
+  async function runJudge(photo: Blob, useSkin: boolean, u: Undertone) {
+    const mine = ++latest.current
+    setBusy(true)
+    setError('')
+    try {
+      const r = await colorSelfie(photo, u, useSkin, items.map(payload))
+      if (mine === latest.current) setJudge(r)
+    } catch (e) {
+      if (mine === latest.current) setError(e instanceof Error ? `${e.message} Is the AI service running?` : 'Something went wrong.')
+    }
+    if (mine === latest.current) setBusy(false)
+  }
+
+  function onOutfitPhoto(p: Blob) {
+    setOutfitPhoto(p)
+    setJudge(null)
+    void runJudge(p, useSelfieSkin, undertone)
+  }
+
+  function toggleSelfieSkin(on: boolean) {
+    setUseSelfieSkin(on)
+    if (outfitPhoto) void runJudge(outfitPhoto, on, undertone)
   }
 
   async function readSelfie(photo: Blob) {
@@ -187,6 +218,7 @@ export default function Colors() {
       <div className='flex gap-2'>
         <Button variant={tab === 'match' ? 'primary' : 'secondary'} onClick={() => setTab('match')}>Find matches</Button>
         <Button variant={tab === 'check' ? 'primary' : 'secondary'} onClick={() => setTab('check')}>Check an outfit</Button>
+        <Button variant={tab === 'selfie' ? 'primary' : 'secondary'} onClick={() => setTab('selfie')}>Judge my outfit (selfie)</Button>
       </div>
 
       {items.length === 0 && <Card>Add some clothes to your wardrobe first.</Card>}
@@ -256,6 +288,80 @@ export default function Colors() {
                   <b>{byId.get(check.weakest.item_id)?.name}</b> is the weakest color match. Without it the score would
                   rise by about {check.weakest.gain_if_removed} points.
                 </p>
+              )}
+            </Card>
+          )}
+        </>
+      )}
+
+      {tab === 'selfie' && (
+        <>
+          <Card className='space-y-3'>
+            <p className='font-semibold'>Take a selfie in your outfit</p>
+            <p className='text-sm text-muted'>
+              The AI finds each piece you are wearing, reads your skin tone from your face, and tells you how well the colors
+              work together and on you. Stand back so your outfit shows, in daylight if you can.
+            </p>
+            <SelfieCapture onPhoto={onOutfitPhoto} />
+            <label className='flex items-center gap-2 text-sm'>
+              <input type='checkbox' checked={useSelfieSkin} onChange={e => toggleSelfieSkin(e.target.checked)} />
+              Use the skin tone from this selfie (otherwise I use the undertone set above)
+            </label>
+            {outfitUrl && <img src={outfitUrl} alt='your outfit' className='max-h-72 rounded-lg' />}
+            {busy && <p className='text-sm text-muted'>Looking at your outfit...</p>}
+            <p className='text-xs text-muted'>Your photo is sent to the AI service to read the clothes and is not saved.</p>
+          </Card>
+
+          {judge && judge.pieces.length === 0 && <Card>{judge.message}</Card>}
+          {judge && judge.pieces.length > 0 && judge.score !== undefined && (
+            <Card className='space-y-3'>
+              <div className='flex flex-wrap gap-3'>
+                {judge.pieces.map((p, i) => (
+                  <div key={i} className={`w-24 text-center text-xs ${judge.weakest?.index === i ? 'rounded-lg ring-2 ring-red-400' : ''}`}>
+                    <img src={p.image} alt={groupName(p.subtype ?? p.category, p.category)} className='h-24 w-24 rounded bg-white object-contain' />
+                    <p className='mt-1 font-medium'>{groupName(p.subtype ?? p.category, p.category)}</p>
+                    <p className='flex items-center justify-center gap-1'><Swatches colors={[p.color]} /><span className='text-muted'>{colorName(p.color)}</span></p>
+                    {p.fit && <p className={p.fit === 'suits' ? 'text-green-700' : p.fit === 'less flattering' ? 'text-red-600' : 'text-muted'}>
+                      {p.fit === 'neutral' ? 'neutral on you' : `${p.fit} on you`}</p>}
+                  </div>
+                ))}
+              </div>
+              <p className='flex flex-wrap items-center gap-3'>
+                <span className={`text-xl font-bold ${scoreLabel(judge.score).cls}`}>{judge.score}/100</span>
+                <span className='text-sm text-muted'>{SCHEMES[judge.scheme ?? ''] ?? judge.scheme}</span>
+              </p>
+              <p className='text-sm'>{judge.reason}</p>
+              {judge.undertone?.used && (
+                <p className='flex items-center gap-2 text-xs text-muted'>
+                  {judge.undertone.source === 'selfie' && judge.undertone.estimate && (
+                    <span className='h-4 w-4 rounded-full border border-ink/20' style={{ background: judge.undertone.estimate.color }} />
+                  )}
+                  Undertone used: <b>{judge.undertone.used}</b> ({judge.undertone.source === 'selfie' ? 'read from your selfie' : 'set above'}).
+                  Lighting changes this, so correct it above if it is wrong.
+                </p>
+              )}
+              {judge.weakest && judge.pieces[judge.weakest.index] && (
+                <p className='text-sm'>
+                  The <b>{groupName(judge.pieces[judge.weakest.index].subtype ?? judge.pieces[judge.weakest.index].category, judge.pieces[judge.weakest.index].category).toLowerCase()}</b> (outlined in red)
+                  is the weakest color match. Without it the score would rise by about {judge.weakest.gain_if_removed} points.
+                </p>
+              )}
+              {judge.swaps && judge.swaps.length > 0 && (
+                <div className='space-y-1'>
+                  <p className='text-sm font-semibold'>From your wardrobe, these would look better instead:</p>
+                  <div className='flex flex-wrap gap-3'>
+                    {judge.swaps.map(sw => {
+                      const it = byId.get(sw.item_id)
+                      return it ? (
+                        <div key={sw.item_id} className='w-24 text-center text-xs'>
+                          {it.image_url && <img src={it.image_url} alt={it.name} className='h-24 w-24 rounded object-cover' />}
+                          <p className='truncate font-medium'>{it.name}</p>
+                          <p className='text-muted'>would score {sw.score}</p>
+                        </div>
+                      ) : null
+                    })}
+                  </div>
+                </div>
               )}
             </Card>
           )}

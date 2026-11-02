@@ -32,8 +32,11 @@ export default function Stylist() {
   const ready = items.filter(i => Array.isArray(i.embedding) && i.embedding.length > 0)
   const byId = new Map(items.map(i => [i.id, i]))
 
+  const canSend = !!photo && prompt.trim().length > 0          // both a photo and a question are needed
+
   async function ask() {
     if (!photo) { setError('Take or choose a photo first.'); return }
+    if (!prompt.trim()) { setError('Type a question first, or tap one of the examples.'); return }
     setError('')
     setResult(null)
     setBusy(true)
@@ -54,8 +57,9 @@ export default function Stylist() {
       <div>
         <h1 className='text-2xl font-bold'>Ask the stylist</h1>
         <p className='text-sm text-muted'>
-          Take a photo of what you are wearing and ask what goes with it. The AI finds your shirt, bottom, shoes and
-          accessories in the photo, then picks matching pieces from your wardrobe.
+          Take a photo of what you are wearing, or of a single piece like a watch or a pair of shoes, and ask what goes
+          with it. The AI finds the top, bottom, one-piece, shoes and accessories in the photo, then picks matching
+          pieces from your wardrobe.
         </p>
       </div>
 
@@ -63,7 +67,7 @@ export default function Stylist() {
         <SelfieCapture onPhoto={p => { setPhoto(p); setResult(null) }} />
         {preview && <img src={preview} alt='your photo' className='max-h-72 rounded-lg' />}
 
-        <textarea rows={2} value={prompt} onChange={e => setPrompt(e.target.value)}
+        <textarea rows={2} required aria-required='true' value={prompt} onChange={e => setPrompt(e.target.value)}
           placeholder='Ask anything, e.g. what bottom fits this shirt?'
           className='w-full rounded-lg border border-ink/20 bg-surface p-2 text-sm focus:border-brand focus:outline-none' />
         <div className='flex flex-wrap gap-2'>
@@ -72,7 +76,12 @@ export default function Stylist() {
               className='rounded-full border border-ink/20 px-3 py-1 text-sm hover:bg-ink/5'>{q}</button>
           ))}
         </div>
-        <Button onClick={() => void ask()} disabled={busy || ready.length === 0}>{busy ? 'Looking...' : 'Ask'}</Button>
+        <Button onClick={() => void ask()} disabled={busy || ready.length === 0 || !canSend}>{busy ? 'Looking...' : 'Send'}</Button>
+        {!canSend && ready.length > 0 && (
+          <p className='text-sm text-muted'>
+            To send, {!photo && prompt.trim() ? 'add a photo.' : photo ? 'type a question.' : 'add a photo and type a question.'}
+          </p>
+        )}
         {ready.length === 0 && (
           <p className='text-sm text-muted'>No wardrobe item is ready for the AI yet. Open Outfits and press Prepare first.</p>
         )}
@@ -90,7 +99,7 @@ export default function Stylist() {
 
           {result.detected.length > 0 && (
             <Card className='space-y-2'>
-              <p className='font-semibold'>What I see you wearing</p>
+              <p className='font-semibold'>{result.mode === 'item' ? 'What I see in your photo' : 'What I see you wearing'}</p>
               <div className='flex flex-wrap gap-3'>
                 {result.detected.map((d, i) => (
                   <div key={i} className='w-24 text-center text-xs'>

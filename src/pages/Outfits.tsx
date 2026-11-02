@@ -93,7 +93,7 @@ export default function Outfits() {
       </div>
 
       <Card className='space-y-3'>
-        <textarea rows={2} value={event} onChange={e => setEvent(e.target.value)}
+        <textarea rows={2} required aria-required='true' value={event} onChange={e => setEvent(e.target.value)}
           placeholder="e.g. friend's wedding, outdoors, evening"
           className='w-full rounded-lg border border-ink/20 bg-surface p-2 text-sm focus:border-brand focus:outline-none' />
         <div className='flex flex-wrap gap-2'>
@@ -138,9 +138,10 @@ export default function Outfits() {
           </div>
         </div>
         <div className='flex flex-wrap items-center gap-3'>
-          <Button onClick={() => void suggest()} disabled={busy || loading || ready.length === 0}>
+          <Button onClick={() => void suggest()} disabled={busy || loading || ready.length === 0 || !event.trim()}>
             {busy ? 'Thinking...' : 'Suggest outfits'}
           </Button>
+          {!event.trim() && ready.length > 0 && <span className='text-sm text-muted'>Describe the event to continue.</span>}
           {missing > 0 && (
             <Button variant='secondary' onClick={() => void prepareOld()} disabled={!!prep}>
               {prep || `Prepare ${missing} item${missing > 1 ? 's' : ''} for the AI`}
