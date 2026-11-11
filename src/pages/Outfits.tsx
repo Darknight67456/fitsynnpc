@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { embedImage, recommend, type RecommendResult } from '../lib/ai'
 import { useWardrobe } from '../modules/wardrobe/useWardrobe'
@@ -15,6 +16,7 @@ const THEMES = [
 
 export default function Outfits() {
   const { items, loading, error: loadError, reload } = useWardrobe()
+  const navigate = useNavigate()
   const [event, setEvent] = useState('')
   const [weather, setWeather] = useState('')       // '' = let the AI decide
   const [formality, setFormality] = useState('')   // '' = let the AI decide
@@ -180,10 +182,18 @@ export default function Outfits() {
                 })}
               </div>
               <p className='text-sm'>{o.reason}</p>
-              <Button variant={worn === idx ? 'secondary' : 'primary'} disabled={worn === idx}
-                onClick={() => void wearThis(idx)}>
-                {worn === idx ? 'Logged as worn today' : 'Wear this'}
-              </Button>
+              <div className='flex flex-wrap items-center gap-2'>
+                <Button variant={worn === idx ? 'secondary' : 'primary'} disabled={worn === idx}
+                  onClick={() => void wearThis(idx)}>
+                  {worn === idx ? 'Logged as worn today' : 'Wear this'}
+                </Button>
+                <Button
+                  variant='secondary'
+                  onClick={() => navigate(`/visualizer?items=${encodeURIComponent(o.item_ids.join(','))}`)}
+                >
+                  Preview in 3D Try-on
+                </Button>
+              </div>
             </Card>
           ))}
         </div>

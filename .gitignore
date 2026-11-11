@@ -38,3 +38,12 @@ ai/data/
 *.joblib
 emb_cache_*.npz
 polyvore_emb_*.npz
+
+.cache/
+fitsynnpc-main/
+
+# Demo clothing catalog images: local only until usage rights are confirmed
+public/demo-catalog/
+
+# Local backups of the RunPod worker
+runpod-worker/_backup*/
