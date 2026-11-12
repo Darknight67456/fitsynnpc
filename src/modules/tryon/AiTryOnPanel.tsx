@@ -3,6 +3,7 @@ import Card from '../../components/Card'
 import Button from '../../components/Button'
 import type { ClothingItem } from '../../types'
 import type { DemoGarmentMeta } from '../catalog/catalogTypes'
+import type { FrontCaptureFn } from '../avatar/Avatar3D'
 import {
   AiTryOnCancelledError,
   generateAiTryOn,
@@ -19,16 +20,21 @@ interface AiTryOnPanelProps {
   garments: ClothingItem[]
   originOf: (item: ClothingItem) => GarmentOrigin
   demoMeta: Record<string, DemoGarmentMeta>
-  onCaptureFrontMannequin: () => Promise<string>
+  /** Records that the team may use this catalog photo (by catalog id). */
+  onConfirmRights: (catalogId: string) => void
+  onCaptureFrontMannequin: FrontCaptureFn
   /** Bumped by the "AI try-on" button under the mannequin to start a run. */
   triggerSeq?: number
 }
 
 type RunState =
   | { kind: 'idle' }
-  | { kind: 'working'; stage: AiTryOnProgress | 'capturing' }
-  | { kind: 'success'; result: AiTryOnResponse }
+  | { kind: 'working'; stage: AiTryOnProgress | 'capturing'; step?: string }
+  | { kind: 'success'; result: AiTryOnResponse; layers: AiTryOnResponse[] }
   | { kind: 'error'; message: string }
+
+// Garments CatVTON draws under a jacket. Outerwear is then added over the result in a second run.
+const UNDER_LAYER = new Set(['top', 'dress'])
 
 const STAGE_TEXT: Record<AiTryOnProgress | 'capturing', string> = {
   capturing: 'Taking a front photo of your mannequin…',
@@ -48,6 +54,7 @@ export default function AiTryOnPanel({
   garments,
   originOf,
   demoMeta,
+  onConfirmRights,
   onCaptureFrontMannequin,
   triggerSeq = 0,
 }: AiTryOnPanelProps) {
@@ -59,10 +66,29 @@ export default function AiTryOnPanel({
 
   const [chosenId, setChosenId] = useState<string | null>(null)
   const chosen = eligible.find(c => c.item.id === chosenId) ?? eligible[0] ?? null
+  // Worn jacket that goes over the chosen top or dress, when there is one.
+  const outer =
+    chosen && UNDER_LAYER.has(chosen.item.category)
+      ? (eligible.find(c => c.item.category === 'outerwear') ?? null)
+      : null
   const [run, setRun] = useState<RunState>({ kind: 'idle' })
   const [simulateError, setSimulateError] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
   const isLive = TRYON_MODE === 'edge_function'
+  // Catalog photos in this run whose usage rights still need a tick before a live run.
+  const needsRights = isLive
+    ? [chosen, outer].filter(
+        (c): c is NonNullable<typeof c> =>
+          !!c && c.origin === 'demo_catalog' && !demoMeta[c.item.id]?.rightsConfirmed
+      )
+    : []
+
+  function confirmRights(itemId: string) {
+    const meta = demoMeta[itemId]
+    if (!meta) return
+    onConfirmRights(meta.catalogId)
+    if (run.kind === 'error') setRun({ kind: 'idle' })
+  }
 
   useEffect(() => () => abortRef.current?.abort(), [])
 
@@ -71,9 +97,18 @@ export default function AiTryOnPanel({
       setRun({ kind: 'error', message: 'Put a top, bottom, dress or outerwear with a photo on the mannequin first.' })
       return
     }
-    const category = mapCategoryToCatVTON(chosen.item.category)
-    if (!category) return
-    const meta = demoMeta[chosen.item.id]
+    const layers = outer ? [chosen, outer] : [chosen]
+    // Check every layer before the first GPU run, so a blocked jacket does not waste the top's run.
+    if (isLive) {
+      const unconfirmed = layers.find(l => l.origin === 'demo_catalog' && !demoMeta[l.item.id]?.rightsConfirmed)
+      if (unconfirmed) {
+        setRun({
+          kind: 'error',
+          message: `${unconfirmed.item.name} has no confirmed usage rights yet. Approve it in the Catalog review before a live run.`,
+        })
+        return
+      }
+    }
 
     abortRef.current?.abort()
     const controller = new AbortController()
@@ -81,27 +116,48 @@ export default function AiTryOnPanel({
     setRun({ kind: 'working', stage: 'capturing' })
 
     try {
-      const person = await onCaptureFrontMannequin()
-      const result = await generateAiTryOn(
-        {
-          personImageBase64: person,
-          garmentItem: chosen.item,
-          catvtonCategory: category,
-          maskingStrategy: 'auto',
-          numInferenceSteps: 25,
-          guidanceScale: 2.5,
-          seed: 42,
-          garmentSource: chosen.origin === 'demo_catalog' ? 'demo_catalog' : 'wardrobe',
-          garmentRightsConfirmed: meta ? meta.rightsConfirmed : true,
-          sleeveLength: meta?.sleeveLength ?? 'auto',
-        },
-        {
-          simulateError,
-          signal: controller.signal,
-          onProgress: stage => setRun({ kind: 'working', stage }),
-        }
-      )
-      setRun({ kind: 'success', result })
+      // With a jacket on top, photograph the mannequin without it; the jacket is drawn last.
+      const captured = await onCaptureFrontMannequin(outer ? { hideCategories: ['outerwear'] } : undefined)
+      let person = captured
+      const results: AiTryOnResponse[] = []
+      for (const [i, layer] of layers.entries()) {
+        const category = mapCategoryToCatVTON(layer.item.category)
+        if (!category) continue
+        const meta = demoMeta[layer.item.id]
+        const step = layers.length > 1 ? `Step ${i + 1} of ${layers.length} · ${layer.item.name}` : undefined
+        const result = await generateAiTryOn(
+          {
+            personImageBase64: person,
+            garmentItem: layer.item,
+            catvtonCategory: category,
+            maskingStrategy: 'auto',
+            numInferenceSteps: 25,
+            guidanceScale: 2.5,
+            seed: 42,
+            garmentSource: layer.origin === 'demo_catalog' ? 'demo_catalog' : 'wardrobe',
+            garmentRightsConfirmed: meta ? meta.rightsConfirmed : true,
+            sleeveLength: meta?.sleeveLength ?? 'auto',
+          },
+          {
+            simulateError,
+            signal: controller.signal,
+            onProgress: stage => setRun({ kind: 'working', stage, step }),
+          }
+        )
+        results.push(result)
+        person = result.resultImageDataUrl
+      }
+      const last = results[results.length - 1]
+      const combined: AiTryOnResponse =
+        results.length === 1
+          ? last
+          : {
+              ...last,
+              capturedMannequinDataUrl: captured,
+              garmentName: results.map(r => r.garmentName).join(' + '),
+              metrics: { ...last.metrics, totalMs: results.reduce((sum, r) => sum + r.metrics.totalMs, 0) },
+            }
+      setRun({ kind: 'success', result: combined, layers: results })
     } catch (err) {
       if (err instanceof AiTryOnCancelledError) {
         setRun({ kind: 'idle' })
@@ -124,7 +180,6 @@ export default function AiTryOnPanel({
 
   const working = run.kind === 'working'
   const blocked = candidates.filter(c => c.reason !== null)
-  const chosenMeta = chosen ? demoMeta[chosen.item.id] : undefined
 
   return (
     <Card className='space-y-4' data-testid='ai-tryon-panel'>
@@ -180,11 +235,29 @@ export default function AiTryOnPanel({
               CatVTON dresses one garment per photo. Generate once for each piece you want to see.
             </p>
           )}
-          {chosenMeta && !chosenMeta.rightsConfirmed && isLive && (
-            <p className='mt-1.5 text-xs text-amber-800'>
-              This catalog photo's usage rights are not confirmed yet. Confirm them in the Catalog review before a live run.
+          {outer && (
+            <p className='mt-1.5 text-xs text-muted'>
+              {outer.item.name} goes on over this in a second run, so this takes two GPU runs.
             </p>
           )}
+          {needsRights.map(c => (
+            <label
+              key={c.item.id}
+              className='mt-2 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-2.5 text-xs text-amber-900'
+            >
+              <input
+                type='checkbox'
+                className='mt-0.5 h-4 w-4 shrink-0'
+                checked={false}
+                disabled={working}
+                onChange={() => confirmRights(c.item.id)}
+              />
+              <span>
+                The team has the right to use the photo of <span className='font-medium'>{c.item.name}</span> (owner
+                consent, or our own photo or edit). It is sent to the GPU worker for this run.
+              </span>
+            </label>
+          ))}
         </div>
       )}
       {blocked.length > 0 && (
@@ -194,7 +267,7 @@ export default function AiTryOnPanel({
       )}
 
       <div className='flex flex-wrap items-center gap-2'>
-        <Button onClick={() => void start()} disabled={working || !chosen} data-testid='generate-ai-tryon-btn'>
+        <Button onClick={() => void start()} disabled={working || !chosen || needsRights.length > 0} data-testid='generate-ai-tryon-btn'>
           {working ? 'Generating…' : run.kind === 'success' ? 'Generate again' : 'Generate try-on photo'}
         </Button>
         {working && (
@@ -214,7 +287,10 @@ export default function AiTryOnPanel({
         {run.kind === 'working' && (
           <div className='flex items-center gap-3 rounded-lg bg-brand/5 p-3 text-sm' role='status' data-testid='ai-tryon-loading'>
             <span className='h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-brand border-t-transparent motion-reduce:animate-none' />
-            {STAGE_TEXT[run.stage]}
+            <span>
+              {run.step && <span className='block font-medium'>{run.step}</span>}
+              {STAGE_TEXT[run.stage]}
+            </span>
           </div>
         )}
 
@@ -240,13 +316,19 @@ export default function AiTryOnPanel({
                 <figcaption className='mt-1 text-center text-xs text-muted'>Your mannequin</figcaption>
               </figure>
               <figure>
-                {run.result.garmentImageUrl && (
-                  <img
-                    src={run.result.garmentImageUrl}
-                    alt={run.result.garmentName}
-                    className='aspect-[3/4] w-full rounded-lg bg-white object-contain'
-                  />
-                )}
+                <div className='flex aspect-[3/4] w-full flex-col gap-1'>
+                  {run.layers.map(
+                    layer =>
+                      layer.garmentImageUrl && (
+                        <img
+                          key={layer.garmentName}
+                          src={layer.garmentImageUrl}
+                          alt={layer.garmentName}
+                          className='min-h-0 w-full flex-1 rounded-lg bg-white object-contain'
+                        />
+                      )
+                  )}
+                </div>
                 <figcaption className='mt-1 truncate text-center text-xs text-muted'>{run.result.garmentName}</figcaption>
               </figure>
               <figure>

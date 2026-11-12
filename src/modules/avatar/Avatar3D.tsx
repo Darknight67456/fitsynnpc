@@ -3,7 +3,7 @@ import { Color, PerspectiveCamera } from 'three'
 import { Canvas, useThree } from '@react-three/fiber'
 import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-three/drei'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
-import type { BodyProfile, ClothingItem } from '../../types'
+import type { BodyProfile, Category, ClothingItem } from '../../types'
 import {
   computeAvatarDimensions,
   type AvatarDimensions,
@@ -53,6 +53,12 @@ function readGender(): MannequinGender {
 }
 
 export type CameraView = 'front' | 'side' | 'back' | 'reset'
+
+export interface FrontCaptureOptions {
+  /** Garment categories left out of this capture only (e.g. outerwear for a layered try-on). */
+  hideCategories?: Category[]
+}
+export type FrontCaptureFn = (options?: FrontCaptureOptions) => Promise<string>
 
 /**
  * Calculates the exact camera distance so the full avatar (0 to topOfHead)
@@ -104,7 +110,7 @@ function SceneCameraRig({
   autoRotate: boolean
   onUserOrbitStart: () => void
   onSnapToFront: () => void
-  onRegisterFrontCapture?: (captureFn: () => Promise<string>) => void
+  onRegisterFrontCapture?: (captureFn: FrontCaptureFn) => void
 }) {
   const { camera, gl, scene, size } = useThree()
   const controlsRef = useRef<OrbitControlsImpl | null>(null)
@@ -123,7 +129,7 @@ function SceneCameraRig({
   // Register deterministic front-view canvas capture for AI Virtual Try-On
   useEffect(() => {
     if (!onRegisterFrontCapture) return
-    const captureFront = async (): Promise<string> => {
+    const captureFront: FrontCaptureFn = async (options = {}) => {
       onSnapToFront()
       const orbit = controlsRef.current
       const cam = orbit ? orbit.object : camera
@@ -139,13 +145,18 @@ function SceneCameraRig({
       // are hidden and a flat opaque background is used for the capture only.
       // (A transparent canvas would reach the worker as a black background.)
       const stage = scene.getObjectByName('display-stage')
+      const hidden = (options.hideCategories ?? [])
+        .map(cat => scene.getObjectByName(`garment-${cat}`))
+        .filter((obj): obj is NonNullable<typeof obj> => Boolean(obj && obj.visible))
       const previousBackground = scene.background
       if (stage) stage.visible = false
+      for (const obj of hidden) obj.visible = false
       scene.background = CAPTURE_BACKGROUND
       gl.render(scene, cam)
       const dataUrl = gl.domElement.toDataURL('image/png')
       scene.background = previousBackground
       if (stage) stage.visible = true
+      for (const obj of hidden) obj.visible = true
       gl.render(scene, cam)
       return dataUrl
     }
@@ -229,7 +240,7 @@ export default function Avatar3D({
   worn: ClothingItem[]
   autoRotate?: boolean
   onAutoRotateChange?: (spinning: boolean) => void
-  onRegisterFrontCapture?: (captureFn: () => Promise<string>) => void
+  onRegisterFrontCapture?: (captureFn: FrontCaptureFn) => void
 }) {
   const dims = useMemo(() => computeAvatarDimensions(profile), [profile])
   const [preset, setPreset] = useState<{ view: CameraView; seq: number }>({
@@ -384,11 +395,9 @@ export default function Avatar3D({
         {/* Equipped Modular Garments */}
         <Suspense fallback={null}>
           {worn.map(item => (
-            <GarmentMesh
-              key={item.id}
-              item={item}
-              dims={dims}
-            />
+            <group key={item.id} name={`garment-${item.category}`}>
+              <GarmentMesh item={item} dims={dims} />
+            </group>
           ))}
         </Suspense>
 

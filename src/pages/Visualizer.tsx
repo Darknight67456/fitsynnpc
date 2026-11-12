@@ -5,12 +5,13 @@ import { seedItems } from '../data/seed'
 import { useWardrobe } from '../modules/wardrobe/useWardrobe'
 import { useBodyProfile } from '../modules/profile/useBodyProfile'
 import BodyProfileForm from '../modules/profile/BodyProfileForm'
-import Avatar3D from '../modules/avatar/Avatar3D'
+import Avatar3D, { type FrontCaptureFn } from '../modules/avatar/Avatar3D'
 import AiTryOnPanel, { type GarmentOrigin } from '../modules/tryon/AiTryOnPanel'
 import GarmentPicker, { type GarmentSourceId } from '../modules/fittingRoom/GarmentPicker'
 import { addDeviceLook, readDeviceLooks, removeDeviceLook, type DeviceLook } from '../modules/fittingRoom/deviceLooks'
 import { useDemoCatalog } from '../modules/catalog/useDemoCatalog'
 import { useCatalogColors } from '../modules/catalog/useCatalogColors'
+import { setRightsConfirmed } from '../modules/catalog/catalogReview'
 import { DEMO_ITEM_PREFIX, toDemoMeta, toTryOnClothingItem } from '../modules/catalog/demoGarment'
 import type { DemoGarmentMeta } from '../modules/catalog/catalogTypes'
 import PageHeader from '../components/PageHeader'
@@ -57,7 +58,7 @@ export default function Visualizer() {
   const [aiTriggerSeq, setAiTriggerSeq] = useState(0)
   const appliedUrlQueryRef = useRef('')
   const appliedDemoRef = useRef('')
-  const captureFrontRef = useRef<(() => Promise<string>) | null>(null)
+  const captureFrontRef = useRef<FrontCaptureFn | null>(null)
   const aiPanelRef = useRef<HTMLDivElement | null>(null)
 
   // Team clothing dataset: read-only, served from public/demo-catalog, never written to Supabase.
@@ -77,6 +78,14 @@ export default function Visualizer() {
     return { garments, thumbs, meta }
   }, [demoCatalog.items, catalogColors])
 
+  const confirmGarmentRights = useCallback(
+    (catalogId: string) => {
+      const item = demoCatalog.items.find(i => i.id === catalogId)
+      if (item) setRightsConfirmed(item, true)
+    },
+    [demoCatalog.items]
+  )
+
   const ownedIds = useMemo(() => new Set(items.map(i => i.id)), [items])
   const originOf = useCallback(
     (item: ClothingItem): GarmentOrigin =>
@@ -95,14 +104,14 @@ export default function Visualizer() {
   const worn = WEARABLE.map(cat => wearing[cat]).filter((i): i is ClothingItem => Boolean(i))
   const wornIds = useMemo(() => new Set(worn.map(i => i.id)), [worn])
 
-  const handleRegisterFrontCapture = useCallback((captureFn: () => Promise<string>) => {
+  const handleRegisterFrontCapture = useCallback((captureFn: FrontCaptureFn) => {
     captureFrontRef.current = captureFn
   }, [])
-  const captureFrontMannequin = useCallback(async (): Promise<string> => {
+  const captureFrontMannequin = useCallback<FrontCaptureFn>(async options => {
     if (!captureFrontRef.current) {
       throw new Error('The 3D mannequin is still loading. Try again in a moment.')
     }
-    return captureFrontRef.current()
+    return captureFrontRef.current(options)
   }, [])
 
   const fetchAccountLooks = useCallback(async () => {
@@ -336,6 +345,7 @@ export default function Visualizer() {
               garments={worn}
               originOf={originOf}
               demoMeta={catalog.meta}
+              onConfirmRights={confirmGarmentRights}
               onCaptureFrontMannequin={captureFrontMannequin}
               triggerSeq={aiTriggerSeq}
             />

@@ -1,5 +1,5 @@
 import type { Category } from '../../types'
-import type { LocalReview, ReviewStatus, SleeveLength } from './catalogTypes'
+import type { CatalogItem, LocalReview, ReviewStatus, SleeveLength } from './catalogTypes'
 
 /**
  * Review decisions for the Demo Catalog.
@@ -55,6 +55,17 @@ export function subscribeReviews(fn: () => void): () => void {
 
 export function saveReview(id: string, review: Omit<LocalReview, 'reviewed_at'>) {
   write({ ...getReviews(), [id]: { ...review, reviewed_at: new Date().toISOString() } })
+}
+
+/** Sets only the usage-rights decision, keeping the item's other review values as they are shown now. */
+export function setRightsConfirmed(item: CatalogItem, confirmed: boolean) {
+  saveReview(item.id, {
+    status: item.status,
+    category: item.local?.category ?? item.review.category,
+    name: item.local?.name ?? item.review.name ?? '',
+    sleeve_length: item.local ? item.local.sleeve_length : item.sleeveLength,
+    rights_confirmed: confirmed,
+  })
 }
 
 export function clearReview(id: string) {
