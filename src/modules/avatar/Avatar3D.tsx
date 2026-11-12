@@ -1,5 +1,5 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { PerspectiveCamera } from 'three'
+import { Color, PerspectiveCamera } from 'three'
 import { Canvas, useThree } from '@react-three/fiber'
 import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-three/drei'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
@@ -11,6 +11,46 @@ import {
 import FashionMannequinModel from './FashionMannequinModel'
 import GarmentMesh from './GarmentMesh'
 import MannequinPedestal, { PEDESTAL_FLOOR_Y } from './MannequinPedestal'
+import FittingRoomStage from './FittingRoomStage'
+import { MannequinGenderContext } from './mannequinGender'
+import type { MannequinGender } from './mannequinMorphs'
+
+const GENDER_KEY = 'fitsync.mannequinGender'
+// Plain studio colour behind the mannequin in the CatVTON capture (the worker expects a flat background).
+const CAPTURE_BACKGROUND = new Color('#ece9e3')
+
+/**
+ * Optional real photo of an empty boutique room, shown behind the 3D mannequin.
+ * Drop a file at public/fitting-room/backdrop.jpg; until then the 3D room is used.
+ */
+const BACKDROP_URL = '/fitting-room/backdrop.jpg'
+
+function useBackdropPhoto(url: string): boolean {
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    const img = new Image()
+    img.onload = () => {
+      if (!cancelled) setReady(true)
+    }
+    img.onerror = () => {
+      if (!cancelled) setReady(false)
+    }
+    img.src = url
+    return () => {
+      cancelled = true
+    }
+  }, [url])
+  return ready
+}
+
+function readGender(): MannequinGender {
+  try {
+    return localStorage.getItem(GENDER_KEY) === 'male' ? 'male' : 'female'
+  } catch {
+    return 'female'
+  }
+}
 
 export type CameraView = 'front' | 'side' | 'back' | 'reset'
 
@@ -95,12 +135,16 @@ function SceneCameraRig({
       if (orbit) {
         orbit.update()
       }
-      // The worker cuts the mannequin out of this picture; the display base would be
-      // read as part of the body, so it is hidden for the capture only.
+      // The worker cuts the mannequin out of this picture, so the room and display base
+      // are hidden and a flat opaque background is used for the capture only.
+      // (A transparent canvas would reach the worker as a black background.)
       const stage = scene.getObjectByName('display-stage')
+      const previousBackground = scene.background
       if (stage) stage.visible = false
+      scene.background = CAPTURE_BACKGROUND
       gl.render(scene, cam)
       const dataUrl = gl.domElement.toDataURL('image/png')
+      scene.background = previousBackground
       if (stage) stage.visible = true
       gl.render(scene, cam)
       return dataUrl
@@ -193,6 +237,17 @@ export default function Avatar3D({
     seq: 0,
   })
   const [manualOrbited, setManualOrbited] = useState(false)
+  const [gender, setGender] = useState<MannequinGender>(readGender)
+  const hasBackdrop = useBackdropPhoto(BACKDROP_URL)
+
+  function chooseGender(next: MannequinGender) {
+    setGender(next)
+    try {
+      localStorage.setItem(GENDER_KEY, next)
+    } catch {
+      // Storage blocked: the choice still applies for this visit.
+    }
+  }
 
   // Only highlight a preset button when not auto-rotating and not manually orbited away
   const activeView: 'front' | 'side' | 'back' | null =
@@ -227,6 +282,11 @@ export default function Avatar3D({
     <div
       className='relative h-[430px] w-full overflow-hidden rounded-xl border border-ink/10 bg-gradient-to-b from-[#f5f3ef] via-[#edeae3] to-[#e1dcd3] sm:h-[460px] md:h-[500px] lg:h-[540px] xl:h-[560px]'
       data-testid='avatar-viewport'
+      style={
+        hasBackdrop
+          ? { backgroundImage: `url(${BACKDROP_URL})`, backgroundSize: 'cover', backgroundPosition: 'center bottom' }
+          : undefined
+      }
     >
       {/* Top-left parametric profile summary badge */}
       <div className='pointer-events-none absolute left-3 top-3 z-10 flex flex-wrap items-center gap-1.5 rounded-lg border border-ink/10 bg-white/90 px-2.5 py-1.5 text-xs text-ink shadow-sm backdrop-blur-sm'>
@@ -261,6 +321,28 @@ export default function Avatar3D({
         })}
       </div>
 
+      {/* Bottom-left mannequin body choice */}
+      <div
+        className='absolute bottom-3 left-3 z-10 flex items-center gap-1 rounded-lg border border-ink/10 bg-white/90 p-1 shadow-sm backdrop-blur-sm'
+        role='radiogroup'
+        aria-label='Mannequin body'
+      >
+        {(['female', 'male'] as const).map(g => (
+          <button
+            key={g}
+            type='button'
+            role='radio'
+            aria-checked={gender === g}
+            onClick={() => chooseGender(g)}
+            className={`rounded-md px-2.5 py-1 text-xs font-medium capitalize transition ${
+              gender === g ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5'
+            }`}
+          >
+            {g}
+          </button>
+        ))}
+      </div>
+
       <Canvas
         frameloop='demand'
         gl={{ antialias: true, preserveDrawingBuffer: true }}
@@ -283,7 +365,13 @@ export default function Avatar3D({
           <Lightformer position={[3, 2, 0]} rotation={[0, -Math.PI / 2, 0]} scale={[2, 4, 1]} intensity={1.5} />
           <Lightformer position={[0, 4, -3]} rotation={[0, Math.PI, 0]} scale={[3, 3, 1]} intensity={2} />
         </Environment>
+        <MannequinGenderContext.Provider value={gender}>
         <group name='display-stage'>
+          {!hasBackdrop && (
+            <Suspense fallback={null}>
+              <FittingRoomStage />
+            </Suspense>
+          )}
           <ContactShadows position={[0, PEDESTAL_FLOOR_Y, 0]} opacity={0.5} scale={4} blur={2.2} far={2.5} resolution={512} color='#3d3a36' />
           <MannequinPedestal />
         </group>
@@ -313,6 +401,7 @@ export default function Avatar3D({
           onSnapToFront={handleSnapToFront}
           onRegisterFrontCapture={onRegisterFrontCapture}
         />
+        </MannequinGenderContext.Provider>
       </Canvas>
     </div>
   )

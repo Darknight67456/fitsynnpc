@@ -42,6 +42,8 @@ import zlib from 'node:zlib'
  */
 
 const CACHE_DIR = path.resolve('.cache/mpfb2')
+// MANNEQUIN_GENDER=male builds public/models/fashion-mannequin-male.glb with male MakeHuman targets.
+const GENDER = process.env.MANNEQUIN_GENDER === 'male' ? 'male' : 'female'
 const BASE_RAW_URL =
   'https://raw.githubusercontent.com/makehumancommunity/mpfb2/master/src/mpfb/data/'
 
@@ -86,6 +88,15 @@ const TARGET_FILES = {
     'targets/macrodetails/universal-female-young-averagemuscle-maxweight.target.gz',
   weightMin:
     'targets/macrodetails/universal-female-young-averagemuscle-minweight.target.gz',
+  // Male baseline (used when MANNEQUIN_GENDER=male)
+  maleCaucasian: 'targets/macrodetails/caucasian-male-young.target.gz',
+  maleAsian: 'targets/macrodetails/asian-male-young.target.gz',
+  maleIdeal:
+    'targets/macrodetails/proportions/male-young-averagemuscle-averageweight-idealproportions.target.gz',
+  weightMaxMale:
+    'targets/macrodetails/universal-male-young-averagemuscle-maxweight.target.gz',
+  weightMinMale:
+    'targets/macrodetails/universal-male-young-averagemuscle-minweight.target.gz',
   thighIncr: 'targets/legs/measure-thigh-circ-incr.target.gz',
   calfIncr: 'targets/legs/measure-calf-circ-incr.target.gz',
   upperarmIncr: 'targets/arms/measure-upperarm-circ-incr.target.gz',
@@ -1600,10 +1611,16 @@ async function main() {
   }
 
   // Bake feminine studio mannequin baseline (blend Caucasian + Asian female young + ideal proportions + firm bust)
-  addScaledDeltas(rawPos, targets.femaleCaucasian, 0.55)
-  addScaledDeltas(rawPos, targets.femaleAsian, 0.45)
-  addScaledDeltas(rawPos, targets.femaleIdeal, 0.65)
-  addScaledDeltas(rawPos, targets.femaleFirmMax, 0.45)
+  if (GENDER === 'male') {
+    addScaledDeltas(rawPos, targets.maleCaucasian, 0.55)
+    addScaledDeltas(rawPos, targets.maleAsian, 0.45)
+    addScaledDeltas(rawPos, targets.maleIdeal, 0.65)
+  } else {
+    addScaledDeltas(rawPos, targets.femaleCaucasian, 0.55)
+    addScaledDeltas(rawPos, targets.femaleAsian, 0.45)
+    addScaledDeltas(rawPos, targets.femaleIdeal, 0.65)
+    addScaledDeltas(rawPos, targets.femaleFirmMax, 0.45)
+  }
 
   // Bake facial feature reduction targets to flatten nose/lips/eye sockets before Laplacian smoothing
   addScaledDeltas(rawPos, targets.noseDepthDecr, 0.95)
@@ -1674,11 +1691,13 @@ async function main() {
     targets.underbustIncr,
     metricScale * 0.55
   )
-  addScaledDeltas(
-    masterMorphs.chest_size,
-    targets.femaleCupMax,
-    metricScale * 0.55
-  )
+  if (GENDER === 'female') {
+    addScaledDeltas(
+      masterMorphs.chest_size,
+      targets.femaleCupMax,
+      metricScale * 0.55
+    )
+  }
 
   // waist_size: combines official measure-waist-circ-incr + stomach-pregnant-incr
   addScaledDeltas(
@@ -1708,10 +1727,14 @@ async function main() {
   )
 
   // body_mass: combines official maxweight - minweight + thigh/calf/upperarm circumference
-  addScaledDeltas(masterMorphs.body_mass, targets.weightMax, metricScale * 0.55)
   addScaledDeltas(
     masterMorphs.body_mass,
-    targets.weightMin,
+    GENDER === 'male' ? targets.weightMaxMale : targets.weightMax,
+    metricScale * 0.55
+  )
+  addScaledDeltas(
+    masterMorphs.body_mass,
+    GENDER === 'male' ? targets.weightMinMale : targets.weightMin,
     -metricScale * 0.35
   )
   addScaledDeltas(masterMorphs.body_mass, targets.thighIncr, metricScale * 0.50)
@@ -2547,7 +2570,9 @@ async function main() {
   }
 
   // Export all 17 meshes into a single binary glTF 2.0 (.glb) file
-  const outPath = path.resolve('public/models/fashion-mannequin.glb')
+  const outPath = path.resolve(
+    GENDER === 'male' ? 'public/models/fashion-mannequin-male.glb' : 'public/models/fashion-mannequin.glb'
+  )
   exportMultiMeshGlb(allMeshes, outPath)
 }
 

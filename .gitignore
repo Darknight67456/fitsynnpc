@@ -42,8 +42,7 @@ polyvore_emb_*.npz
 .cache/
 fitsynnpc-main/
 
-# Demo clothing catalog images: local only until usage rights are confirmed
-public/demo-catalog/
+# Demo clothing catalog: published with the site by team decision (2026-11-12).
 
 # Local backups of the RunPod worker
 runpod-worker/_backup*/

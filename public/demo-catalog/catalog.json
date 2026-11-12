@@ -1,0 +1,1540 @@
+{
+ "schema": "fitsync-demo-catalog/1",
+ "generated_at": "2026-11-11T11:47:03+00:00",
+ "source_manifest": {
+  "dataset": "FitSync team cloth images",
+  "version": "preparation-1",
+  "notes": "These items are not inserted into Supabase or React. Review categories, labels, ownership and rights before importing. Photos may include backgrounds, shoes and apparel; edited_clothing may include synthetic edits.",
+  "item_count": 113
+ },
+ "policy": {
+  "production_import": "blocked until each item is reviewed and rights are confirmed",
+  "storage": "local, git-ignored; never written to the clothing_items table"
+ },
+ "items": [
+  {
+   "id": "1db7556914ff7431",
+   "image": "images/edited_clothing/1db7556914ff-ChatGPT-Image-Nov-9-2026-12_33_39-PM-2.jpg",
+   "thumb": "thumbs/edited_clothing/1db7556914ff-ChatGPT-Image-Nov-9-2026-12_33_39-PM-2.jpg",
+   "width": 1086,
+   "height": 1448,
+   "bytes": 232188,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "edited_clothing",
+   "role": "edited_demo_item",
+   "origin": {
+    "label": "AI-edited demo image",
+    "detail": "Synthetic edit (ChatGPT). Not a photo of a real owned garment."
+   },
+   "source_path": "Dataset Cloth/chatgpt edit/ChatGPT Image Nov 9, 2026, 12_33_39 PM-2.png",
+   "original_sha256": "1db7556914ff7431ae3b09789ad22b2cde58c2c5f4fe7145af3ac57c6f6d999e",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "short_sleeve",
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "short_sleeve"
+   },
+   "flags": [
+    "synthetic_edit"
+   ]
+  },
+  {
+   "id": "e9004a810ce0f497",
+   "image": "images/edited_clothing/e9004a810ce0-ChatGPT-Image-Nov-9-2026-12_33_40-PM-3.jpg",
+   "thumb": "thumbs/edited_clothing/e9004a810ce0-ChatGPT-Image-Nov-9-2026-12_33_40-PM-3.jpg",
+   "width": 1086,
+   "height": 1448,
+   "bytes": 259195,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "edited_clothing",
+   "role": "edited_demo_item",
+   "origin": {
+    "label": "AI-edited demo image",
+    "detail": "Synthetic edit (ChatGPT). Not a photo of a real owned garment."
+   },
+   "source_path": "Dataset Cloth/chatgpt edit/ChatGPT Image Nov 9, 2026, 12_33_40 PM-3.png",
+   "original_sha256": "e9004a810ce0f497599d430d1422cbfcdb36d7dc855221663b5ef0752fad207b",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "short_sleeve",
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "short_sleeve"
+   },
+   "flags": [
+    "synthetic_edit"
+   ]
+  },
+  {
+   "id": "6b14fa87e7140375",
+   "image": "images/edited_clothing/6b14fa87e714-ChatGPT-Image-Nov-9-2026-12_33_41-PM-4.jpg",
+   "thumb": "thumbs/edited_clothing/6b14fa87e714-ChatGPT-Image-Nov-9-2026-12_33_41-PM-4.jpg",
+   "width": 1086,
+   "height": 1448,
+   "bytes": 249955,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "edited_clothing",
+   "role": "edited_demo_item",
+   "origin": {
+    "label": "AI-edited demo image",
+    "detail": "Synthetic edit (ChatGPT). Not a photo of a real owned garment."
+   },
+   "source_path": "Dataset Cloth/chatgpt edit/ChatGPT Image Nov 9, 2026, 12_33_41 PM-4.png",
+   "original_sha256": "6b14fa87e714037597dc0990bc467bc0fc6648cf75a989fea146ca6607c1b92a",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "short_sleeve",
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "short_sleeve"
+   },
+   "flags": [
+    "synthetic_edit"
+   ]
+  },
+  {
+   "id": "8ca541740d3c18e4",
+   "image": "images/edited_clothing/8ca541740d3c-ChatGPT-Image-Nov-9-2026-12_33_43-PM-5.jpg",
+   "thumb": "thumbs/edited_clothing/8ca541740d3c-ChatGPT-Image-Nov-9-2026-12_33_43-PM-5.jpg",
+   "width": 1086,
+   "height": 1448,
+   "bytes": 220828,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "edited_clothing",
+   "role": "edited_demo_item",
+   "origin": {
+    "label": "AI-edited demo image",
+    "detail": "Synthetic edit (ChatGPT). Not a photo of a real owned garment."
+   },
+   "source_path": "Dataset Cloth/chatgpt edit/ChatGPT Image Nov 9, 2026, 12_33_43 PM-5.png",
+   "original_sha256": "8ca541740d3c18e471c9208374b64803e92b83102ec002724cea166e95109a00",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "short_sleeve",
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "short_sleeve"
+   },
+   "flags": [
+    "synthetic_edit"
+   ]
+  },
+  {
+   "id": "5198338c72506f12",
+   "image": "images/catalog_references/5198338c7250-0edb1ffa6b6e006a2e9dbba5f247262c.jpg",
+   "thumb": "thumbs/catalog_references/5198338c7250-0edb1ffa6b6e006a2e9dbba5f247262c.jpg",
+   "width": 736,
+   "height": 1104,
+   "bytes": 60377,
+   "thumb_width": 320,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/0edb1ffa6b6e006a2e9dbba5f247262c.jpg",
+   "original_sha256": "5198338c72506f12825a88a0f8d48a243e8d8f01508c6a4c31aef27503de80ea",
+   "suggested": {
+    "category": "outerwear",
+    "sleeve_length": "long_sleeve",
+    "note": "Leather jacket",
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "outerwear",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "b3936c745715a7bd",
+   "image": "images/catalog_references/b3936c745715-1517843201041539e2a66dcfdd7d65a3.jpg",
+   "thumb": "thumbs/catalog_references/b3936c745715-1517843201041539e2a66dcfdd7d65a3.jpg",
+   "width": 900,
+   "height": 1200,
+   "bytes": 90928,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/1517843201041539e2a66dcfdd7d65a3.jpg",
+   "original_sha256": "b3936c745715a7bd185df8cad522690db278eab373746e8610d9f95c76f25262",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "0fd64df7fe62d544",
+   "image": "images/catalog_references/0fd64df7fe62-153227a2cdb794600f4b1b4c422d7a02.jpg",
+   "thumb": "thumbs/catalog_references/0fd64df7fe62-153227a2cdb794600f4b1b4c422d7a02.jpg",
+   "width": 1080,
+   "height": 1350,
+   "bytes": 37358,
+   "thumb_width": 384,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/153227a2cdb794600f4b1b4c422d7a02.jpg",
+   "original_sha256": "0fd64df7fe62d54444434596a4e112cf8ce91800b80ea68844a82e3419d6b510",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "113d44c6cca47197",
+   "image": "images/catalog_references/113d44c6cca4-16b5567b2da7e0ffe7f336db14df8478.jpg",
+   "thumb": "thumbs/catalog_references/113d44c6cca4-16b5567b2da7e0ffe7f336db14df8478.jpg",
+   "width": 832,
+   "height": 1292,
+   "bytes": 140178,
+   "thumb_width": 309,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/16b5567b2da7e0ffe7f336db14df8478.jpg",
+   "original_sha256": "113d44c6cca47197693c9e0fee425bf18feeb9fbf36254d869a4f805c164fcff",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "ec08d99a83744795",
+   "image": "images/catalog_references/ec08d99a8374-288a3983105a60d451d8f46a74370e0c.jpg",
+   "thumb": "thumbs/catalog_references/ec08d99a8374-288a3983105a60d451d8f46a74370e0c.jpg",
+   "width": 700,
+   "height": 1050,
+   "bytes": 69383,
+   "thumb_width": 320,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/288a3983105a60d451d8f46a74370e0c.jpg",
+   "original_sha256": "ec08d99a83744795b686a4098b1da73b6be319726edb1dc834abc0727a7abd74",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "long_sleeve",
+    "note": "Knit sweater",
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "ac33ccccc45cfeee",
+   "image": "images/catalog_references/ac33ccccc45c-3395bc5e8704837334fbc6c43fef9b54.jpg",
+   "thumb": "thumbs/catalog_references/ac33ccccc45c-3395bc5e8704837334fbc6c43fef9b54.jpg",
+   "width": 991,
+   "height": 1587,
+   "bytes": 70131,
+   "thumb_width": 300,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/3395bc5e8704837334fbc6c43fef9b54.jpg",
+   "original_sha256": "ac33ccccc45cfeee619b440e7a3a27c652cbaf551bb5702e9a7551268ac3c552",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "89a0150f99555b04",
+   "image": "images/catalog_references/89a0150f9955-387aa440dab144580fa7368ea47f6d93.jpg",
+   "thumb": "thumbs/catalog_references/89a0150f9955-387aa440dab144580fa7368ea47f6d93.jpg",
+   "width": 850,
+   "height": 1283,
+   "bytes": 62523,
+   "thumb_width": 318,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/387aa440dab144580fa7368ea47f6d93.jpg",
+   "original_sha256": "89a0150f99555b04adefab0c53530144eb19c17e5a6f10be219a33972aa5fe49",
+   "suggested": {
+    "category": "outerwear",
+    "sleeve_length": "long_sleeve",
+    "note": "Denim jacket",
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "outerwear",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "c3eaafb18e594af4",
+   "image": "images/catalog_references/c3eaafb18e59-3a339fc9e6b5070fa27aa07f62726f10.jpg",
+   "thumb": "thumbs/catalog_references/c3eaafb18e59-3a339fc9e6b5070fa27aa07f62726f10.jpg",
+   "width": 736,
+   "height": 1308,
+   "bytes": 56662,
+   "thumb_width": 270,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/3a339fc9e6b5070fa27aa07f62726f10.jpg",
+   "original_sha256": "c3eaafb18e594af4781b367a8b5e3f438360db15425b93922569f96858c18eda",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "0e06734bc6510bc3",
+   "image": "images/catalog_references/0e06734bc651-4c0bc986d9aa564065a5a12ba28f1927.jpg",
+   "thumb": "thumbs/catalog_references/0e06734bc651-4c0bc986d9aa564065a5a12ba28f1927.jpg",
+   "width": 1104,
+   "height": 1600,
+   "bytes": 182858,
+   "thumb_width": 331,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/4c0bc986d9aa564065a5a12ba28f1927.jpg",
+   "original_sha256": "0e06734bc6510bc3067955a2ba2daeb3330338e7ac54420b1640caec3b736d1d",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "long_sleeve",
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "cc012e0b959dbf86",
+   "image": "images/catalog_references/cc012e0b959d-516a64cc766064c797f0181d241bf7f7.jpg",
+   "thumb": "thumbs/catalog_references/cc012e0b959d-516a64cc766064c797f0181d241bf7f7.jpg",
+   "width": 1080,
+   "height": 1080,
+   "bytes": 47684,
+   "thumb_width": 480,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/516a64cc766064c797f0181d241bf7f7.jpg",
+   "original_sha256": "cc012e0b959dbf86aee7c74f42e7eee477a88ebfb99522490779185668da1df8",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "sleeveless",
+    "note": "Knit vest",
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "sleeveless"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "37a26c70ca45f5fa",
+   "image": "images/catalog_references/37a26c70ca45-578d7453019abc2aff88a17d94417628.jpg",
+   "thumb": "thumbs/catalog_references/37a26c70ca45-578d7453019abc2aff88a17d94417628.jpg",
+   "width": 736,
+   "height": 1104,
+   "bytes": 82207,
+   "thumb_width": 320,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/578d7453019abc2aff88a17d94417628.jpg",
+   "original_sha256": "37a26c70ca45f5faf4ea145bac016ca13f29ad58ca164a133562af9e0334add2",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "906f25da873ae7ff",
+   "image": "images/catalog_references/906f25da873a-57e26b9175269e2468848405ef2c70e6.jpg",
+   "thumb": "thumbs/catalog_references/906f25da873a-57e26b9175269e2468848405ef2c70e6.jpg",
+   "width": 1200,
+   "height": 1598,
+   "bytes": 216760,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/57e26b9175269e2468848405ef2c70e6.jpg",
+   "original_sha256": "906f25da873ae7ffb88334b35fd9de7f0fc2fbe5ef74e5fac427c9df43ff2ac2",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": "Skirt",
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "0395f0420adfac8d",
+   "image": "images/catalog_references/0395f0420adf-580ce64bdf8d089724c286b7ca951e93.jpg",
+   "thumb": "thumbs/catalog_references/0395f0420adf-580ce64bdf8d089724c286b7ca951e93.jpg",
+   "width": 1024,
+   "height": 1365,
+   "bytes": 93903,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/580ce64bdf8d089724c286b7ca951e93.jpg",
+   "original_sha256": "0395f0420adfac8d6063ddc91b950839bea58d0d92474652f94da7b54598b5ea",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "long_sleeve",
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "219c9c3299d95b3b",
+   "image": "images/catalog_references/219c9c3299d9-63176a664362e1f2c15d7889de68cd13.jpg",
+   "thumb": "thumbs/catalog_references/219c9c3299d9-63176a664362e1f2c15d7889de68cd13.jpg",
+   "width": 569,
+   "height": 711,
+   "bytes": 14369,
+   "thumb_width": 384,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/63176a664362e1f2c15d7889de68cd13.jpg",
+   "original_sha256": "219c9c3299d95b3b68e044b1fd841dc6edafec42eb4d17d1a4231b43145cb008",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "78a2dd3468647bae",
+   "image": "images/catalog_references/78a2dd346864-70ef2c63a1a83a54c2f40496a74a8e8d.jpg",
+   "thumb": "thumbs/catalog_references/78a2dd346864-70ef2c63a1a83a54c2f40496a74a8e8d.jpg",
+   "width": 750,
+   "height": 1000,
+   "bytes": 39092,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/70ef2c63a1a83a54c2f40496a74a8e8d.jpg",
+   "original_sha256": "78a2dd3468647bae9b6674e3919416d8c591eb8326541a516b649aa9c71d9555",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "long_sleeve",
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "149a1a52163fb593",
+   "image": "images/catalog_references/149a1a52163f-823a09eda90b7f28c3a5abfe07e89e4d.jpg",
+   "thumb": "thumbs/catalog_references/149a1a52163f-823a09eda90b7f28c3a5abfe07e89e4d.jpg",
+   "width": 674,
+   "height": 1011,
+   "bytes": 78498,
+   "thumb_width": 320,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/823a09eda90b7f28c3a5abfe07e89e4d.jpg",
+   "original_sha256": "149a1a52163fb59328dcc1fcf66c7117d3e9b6535abf8c0772a8c4e629c794f3",
+   "suggested": {
+    "category": "outerwear",
+    "sleeve_length": "long_sleeve",
+    "note": "Cardigan",
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "outerwear",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "19fe01f727369607",
+   "image": "images/catalog_references/19fe01f72736-8f9b8d53eca90976e1169629be639f31.jpg",
+   "thumb": "thumbs/catalog_references/19fe01f72736-8f9b8d53eca90976e1169629be639f31.jpg",
+   "width": 1050,
+   "height": 1400,
+   "bytes": 55173,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/8f9b8d53eca90976e1169629be639f31.jpg",
+   "original_sha256": "19fe01f727369607c67d5fcd5cc24f6377a599d2108c4f408397c1bd2811bbd9",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "long_sleeve",
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "1b942050a0099adc",
+   "image": "images/catalog_references/1b942050a009-9322943a979f071dab61607e207c8489.jpg",
+   "thumb": "thumbs/catalog_references/1b942050a009-9322943a979f071dab61607e207c8489.jpg",
+   "width": 1128,
+   "height": 1504,
+   "bytes": 195149,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/9322943a979f071dab61607e207c8489.jpg",
+   "original_sha256": "1b942050a0099adc545ea2443209c3b699a033e9cea9b1aa1fb480b12c626d07",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "long_sleeve",
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "b037f8d3383ac44b",
+   "image": "images/catalog_references/b037f8d3383a-a14f3c664ba03d9b0c40cdec4b19b3a9.jpg",
+   "thumb": "thumbs/catalog_references/b037f8d3383a-a14f3c664ba03d9b0c40cdec4b19b3a9.jpg",
+   "width": 736,
+   "height": 1308,
+   "bytes": 25118,
+   "thumb_width": 270,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/a14f3c664ba03d9b0c40cdec4b19b3a9.jpg",
+   "original_sha256": "b037f8d3383ac44baf7c8c5b1531f0d474e6ebcebc3694a68ff429df8704de30",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "de773dc1fa519905",
+   "image": "images/catalog_references/de773dc1fa51-a2577b4dbed6f821842caddad6df886f.jpg",
+   "thumb": "thumbs/catalog_references/de773dc1fa51-a2577b4dbed6f821842caddad6df886f.jpg",
+   "width": 1199,
+   "height": 1399,
+   "bytes": 103853,
+   "thumb_width": 411,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/a2577b4dbed6f821842caddad6df886f.jpg",
+   "original_sha256": "de773dc1fa5199057d43ff26831fd67e48bd5815718b9f7dc517ae1bf25dd034",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "long_sleeve",
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "e231f1e3f52606b1",
+   "image": "images/catalog_references/e231f1e3f526-af238c7f86d1d9d771fb7053e6620c0f.jpg",
+   "thumb": "thumbs/catalog_references/e231f1e3f526-af238c7f86d1d9d771fb7053e6620c0f.jpg",
+   "width": 736,
+   "height": 1262,
+   "bytes": 36901,
+   "thumb_width": 280,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/af238c7f86d1d9d771fb7053e6620c0f.jpg",
+   "original_sha256": "e231f1e3f52606b19adc81f8f5707fa67d9b3a97a3ca6d04957aba2d76877fdb",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "e7db7dd047350f86",
+   "image": "images/catalog_references/e7db7dd04735-b9b9ce749b1fedff1bcca1c4d47e5a32.jpg",
+   "thumb": "thumbs/catalog_references/e7db7dd04735-b9b9ce749b1fedff1bcca1c4d47e5a32.jpg",
+   "width": 850,
+   "height": 1134,
+   "bytes": 58076,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/b9b9ce749b1fedff1bcca1c4d47e5a32.jpg",
+   "original_sha256": "e7db7dd047350f861d12bc73bfb84417bd5bac054c4af3786cbeb2e19fc33055",
+   "suggested": {
+    "category": "outerwear",
+    "sleeve_length": "long_sleeve",
+    "note": "Cardigan",
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "outerwear",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "9b8eb456f1546f23",
+   "image": "images/catalog_references/9b8eb456f154-c40a3ed9d6657a87ace7c36777f55d06.jpg",
+   "thumb": "thumbs/catalog_references/9b8eb456f154-c40a3ed9d6657a87ace7c36777f55d06.jpg",
+   "width": 736,
+   "height": 1104,
+   "bytes": 36596,
+   "thumb_width": 320,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/c40a3ed9d6657a87ace7c36777f55d06.jpg",
+   "original_sha256": "9b8eb456f1546f230777c820c52c958b26726c8cda9460793213578e33a57644",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "2251435a675be87b",
+   "image": "images/catalog_references/2251435a675b-c478a7b2a66038f43b7928e7aea9721b.jpg",
+   "thumb": "thumbs/catalog_references/2251435a675b-c478a7b2a66038f43b7928e7aea9721b.jpg",
+   "width": 736,
+   "height": 1088,
+   "bytes": 62082,
+   "thumb_width": 325,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/c478a7b2a66038f43b7928e7aea9721b.jpg",
+   "original_sha256": "2251435a675be87bc25799e8d782599af5fd195b62e3c46decd9f27921aabff2",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "34e60678c6c5031c",
+   "image": "images/catalog_references/34e60678c6c5-d7cbdfbf19200a533420b4097b796532.jpg",
+   "thumb": "thumbs/catalog_references/34e60678c6c5-d7cbdfbf19200a533420b4097b796532.jpg",
+   "width": 736,
+   "height": 1129,
+   "bytes": 48393,
+   "thumb_width": 313,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/d7cbdfbf19200a533420b4097b796532.jpg",
+   "original_sha256": "34e60678c6c5031c0c5bd7fb0f93a7cc2e1cb393f56cf5350b8ddc0b284208a4",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "a865d2e1ad75da39",
+   "image": "images/catalog_references/a865d2e1ad75-download-1.jpg",
+   "thumb": "thumbs/catalog_references/a865d2e1ad75-download-1.jpg",
+   "width": 900,
+   "height": 1600,
+   "bytes": 35521,
+   "thumb_width": 270,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/download (1).png",
+   "original_sha256": "a865d2e1ad75da393368ef6b75a6c3dc1c429917aab40f74c9c894cb15244e12",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "2f1f3828a66daf7d",
+   "image": "images/catalog_references/2f1f3828a66d-e48b07743d36f0d745c3512c720ded8c.jpg",
+   "thumb": "thumbs/catalog_references/2f1f3828a66d-e48b07743d36f0d745c3512c720ded8c.jpg",
+   "width": 593,
+   "height": 561,
+   "bytes": 26856,
+   "thumb_width": 480,
+   "thumb_height": 454,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/e48b07743d36f0d745c3512c720ded8c.jpg",
+   "original_sha256": "2f1f3828a66daf7d2d35d7489ed71cbd3d14e1db30ce5c5bd869b27aacb1fb98",
+   "suggested": {
+    "category": "top",
+    "sleeve_length": "long_sleeve",
+    "note": null,
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "top",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": "long_sleeve"
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "18e24ec108f1e604",
+   "image": "images/catalog_references/18e24ec108f1-f1d805b4b548d90e0bab740750cbb8e0.jpg",
+   "thumb": "thumbs/catalog_references/18e24ec108f1-f1d805b4b548d90e0bab740750cbb8e0.jpg",
+   "width": 1000,
+   "height": 1334,
+   "bytes": 72322,
+   "thumb_width": 360,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/f1d805b4b548d90e0bab740750cbb8e0.jpg",
+   "original_sha256": "18e24ec108f1e604a98b2119cb03bb4e32ac374a6c3911749de119933e2194fc",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": "Cargo trousers",
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  },
+  {
+   "id": "38c57f1ac892ba59",
+   "image": "images/catalog_references/38c57f1ac892-f8cf1c46287d24626bd8716958da1686.jpg",
+   "thumb": "thumbs/catalog_references/38c57f1ac892-f8cf1c46287d24626bd8716958da1686.jpg",
+   "width": 647,
+   "height": 1000,
+   "bytes": 39317,
+   "thumb_width": 311,
+   "thumb_height": 480,
+   "source_group": "catalog_references",
+   "role": "catalog_reference",
+   "origin": {
+    "label": "Catalog reference",
+    "detail": "Product-style reference image, likely from a third-party store. Do not treat as user-owned."
+   },
+   "source_path": "outfits/f8cf1c46287d24626bd8716958da1686.jpg",
+   "original_sha256": "38c57f1ac892ba59dacf448771dbbef74fd1b435392c7a2428c82a0b7b1e279b",
+   "suggested": {
+    "category": "bottom",
+    "sleeve_length": null,
+    "note": "Long skirt",
+    "by": "visual pass (unconfirmed)"
+   },
+   "review": {
+    "status": "pending",
+    "category": "bottom",
+    "name": null,
+    "rights_confirmed": false,
+    "sleeve_length": null
+   },
+   "flags": [
+    "third_party_source_likely"
+   ]
+  }
+ ],
+ "excluded": [
+  {
+   "id": "b128e21c39678dcf",
+   "source_path": "Dataset Cloth/chatgpt edit/mannuquein.jpeg",
+   "reason": "mannequin/avatar reference, not clothing"
+  },
+  {
+   "id": "da50363b60d5e11a",
+   "source_path": "Dataset Cloth/chatgpt edit/mannuquein.png",
+   "reason": "mannequin/avatar reference, not clothing"
+  },
+  {
+   "id": "79de8e80bd9f216b",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625687_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "6e32b3be47610c39",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625689_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "c385295c3a67b403",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625690_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "914bcdb07b0598e4",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625704_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "789fa314055c9eae",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625705_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "c343478e9415df38",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625706_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "2cff8021d9f347db",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625712_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "363cbf36717438f6",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625717_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "7767fd0a6fcc2c9e",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625718_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "f1f6eee4fa4d87a1",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625720_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "1b94695fdd387ff2",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625727_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "b1f770e1e7cda7fc",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625728_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "28ac5c98ee1d0e69",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625729_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "376850eecac69383",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625730_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "458962693bee945b",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625734_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "c4e6b1c173ef27f1",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625735_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "9c10b50dcc6d9713",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625736_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "46017ba19f0f3f79",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625737_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "ae573119f1572db0",
+   "source_path": "Dataset Cloth/chatgpt edit/6269423067339625738_premium.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "01ed074ef6542a48",
+   "source_path": "Dataset Cloth/chatgpt edit/ChatGPT Image Nov 9, 2026, 12_33_38 PM-1.png",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "a13e903a2669bad8",
+   "source_path": "Dataset Cloth/chatgpt edit/ChatGPT Image Nov 9, 2026, 12_33_44 PM-6.png",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "0855aff0f777ce3e",
+   "source_path": "Dataset Cloth/chatgpt edit/ChatGPT Image Nov 9, 2026, 12_33_45 PM-7.png",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "a2d6175f709e6992",
+   "source_path": "Dataset Cloth/chatgpt edit/ChatGPT Image Nov 9, 2026, 12_33_46 PM-8.png",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "90af68097c2c08f6",
+   "source_path": "Dataset Cloth/chatgpt edit/ChatGPT Image Nov 9, 2026, 12_33_47 PM-9.png",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "5cb8a9c276f5952b",
+   "source_path": "Dataset Cloth/chatgpt edit/ChatGPT Image Nov 9, 2026, 12_33_48 PM-10.png",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "859754581bac420b",
+   "source_path": "Clothes_part 1_23/20261027_223320.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "770da030b972d57e",
+   "source_path": "Clothes_part 1_23/20261027_223910.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "33000f7104fd99ed",
+   "source_path": "Clothes_part 1_23/20261027_224621.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "81c1bc6a1bd29758",
+   "source_path": "Clothes_part 1_23/20261027_224110.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "03aa51259b6b5959",
+   "source_path": "Clothes_part 1_23/20261027_223435.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "cabb83e902f10d4a",
+   "source_path": "Clothes_part 1_23/20261027_223403.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "912bf24d6f9ed219",
+   "source_path": "Clothes_part 1_23/20261027_224322.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "db4a0639139e95f3",
+   "source_path": "Clothes_part 1_23/20261027_223933.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "43ddbb5e21a088a7",
+   "source_path": "Clothes_part 1_23/20261027_223730.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "f1c46f9e4a42ae52",
+   "source_path": "Clothes_part 1_23/20261027_224425.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "1d1f0e14e06f7fbd",
+   "source_path": "Clothes_part 1_23/20261027_224247.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "c2c75e900f668ef5",
+   "source_path": "Clothes_part 1_23/20261027_224018.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "bafe6b00c2888227",
+   "source_path": "Clothes_part 1_23/20261027_223432.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "9e2f999c302c3306",
+   "source_path": "Clothes_part 1_23/20261027_223515.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "b7a7e0d5aba4176f",
+   "source_path": "Clothes_part 1_23/20261027_224130.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "28e4e5f2ec195ee1",
+   "source_path": "Clothes_part 1_23/20261027_224525.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "4cfa38953b8ba51c",
+   "source_path": "Clothes_part 1_23/20261027_224154.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "98fa152d1d3202b2",
+   "source_path": "Clothes_part 1_23/20261027_223252.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "004cb0e9a5a52f8f",
+   "source_path": "Clothes_part 1_23/20261027_224224.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "d48b1ce1ef4a0514",
+   "source_path": "Clothes_part 1_23/20261027_223953.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "f1bd15f4cfcaab63",
+   "source_path": "Clothes_part 1_23/20261027_223831.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "31094a85ce6289c5",
+   "source_path": "Clothes_part 1_23/20261027_223611.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "a536bbcbd2eaaa1c",
+   "source_path": "Clothes_part 1_23/20261027_223822.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "1a82622f5c4e44e1",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0082.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "fcd4ad74c1ce4bd3",
+   "source_path": "Clothes_part2_30/20261028_194611.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "9bc580cbe1343da3",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0083.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "d85156711227cab7",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0186.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "05ba65f8db27c184",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0084.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "16b011cf1e627d38",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0081.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "0bb55d348e9589d7",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0078.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "154a451d6eda169f",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0079.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "5ced1ef662743a8b",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0164.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "ae2851120b6dd085",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0080.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "f02c809ecff208be",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0185.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "6760e8341672885f",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0160.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "ca985c92297cc5b8",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0076.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "4fb490cfdf2a5f00",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0167.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "a604d304a3dc0f13",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0085.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "1e015dd6c7bbe31b",
+   "source_path": "Clothes_part2_30/20261028_131028.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "ea07392cbc5de92e",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0086.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "37faff0dc8f4e5b3",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0168.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "ddda1f03861c3cdb",
+   "source_path": "Clothes_part2_30/IMG-20261028-WA0161.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "ddf87aec59e8c6d4",
+   "source_path": "Clothes_part2_30/20261028_131121.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "51f3b837ec47d935",
+   "source_path": "Clothes_part2_30/20261028_131405.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "6843656c8ee32a7d",
+   "source_path": "Clothes_part2_30/20261028_194503.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "7dfc7b4732166abc",
+   "source_path": "Clothes_part2_30/20261028_131233(0).jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "65973aca8d3364e2",
+   "source_path": "Clothes_part2_30/20261028_131233.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "31ab9f12d603822a",
+   "source_path": "Clothes_part2_30/20261028_131205.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "10433a4519771dec",
+   "source_path": "Clothes_part2_30/20261028_131311.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "51eb3655423ae76b",
+   "source_path": "Clothes_part2_30/20261028_131443.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "b993ea52fbcd77af",
+   "source_path": "Clothes_part2_30/20261028_130927.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "8acd19c94f444a6d",
+   "source_path": "outfits/699bc922f3107b5509ac0b1ea43f9bd4.jpg",
+   "reason": "not selected for the demo catalog"
+  },
+  {
+   "id": "0c97cee25e5d68ea",
+   "source_path": "outfits/6b32c230049f526457e8940a3c5198f4.jpg",
+   "reason": "not selected for the demo catalog"
+  }
+ ]
+}

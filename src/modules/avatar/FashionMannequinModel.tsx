@@ -3,10 +3,8 @@ import { DoubleSide, Mesh, MeshStandardMaterial } from 'three'
 import { useGLTF } from '@react-three/drei'
 import type { BodyProfile } from '../../types'
 import { getMannequinMaterialConfig } from './mannequinMaterials'
-import {
-  computeMannequinMorphWeights,
-  MANNEQUIN_GLB_PATH,
-} from './mannequinMorphs'
+import { computeMannequinMorphWeights, MANNEQUIN_GLB_PATHS } from './mannequinMorphs'
+import { useMannequinGender } from './mannequinGender'
 
 interface FashionMannequinModelProps {
   profile: BodyProfile
@@ -14,9 +12,10 @@ interface FashionMannequinModelProps {
 
 // The subdivided body and clothing share the five measurement morphs in the GLB.
 export default function FashionMannequinModel({ profile }: FashionMannequinModelProps) {
-  const gltf = useGLTF(MANNEQUIN_GLB_PATH)
+  const gender = useMannequinGender()
+  const gltf = useGLTF(MANNEQUIN_GLB_PATHS[gender])
 
-  const weights = useMemo(() => computeMannequinMorphWeights(profile), [profile])
+  const weights = useMemo(() => computeMannequinMorphWeights(profile, gender), [profile, gender])
   const matConfig = useMemo(
     () => getMannequinMaterialConfig(profile.skin_undertone),
     [profile.skin_undertone]
@@ -78,4 +77,5 @@ export default function FashionMannequinModel({ profile }: FashionMannequinModel
   )
 }
 
-useGLTF.preload(MANNEQUIN_GLB_PATH)
+useGLTF.preload(MANNEQUIN_GLB_PATHS.female)
+useGLTF.preload(MANNEQUIN_GLB_PATHS.male)

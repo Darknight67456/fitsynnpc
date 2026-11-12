@@ -1,7 +1,24 @@
 import type { BodyProfile } from '../../types'
 import { NEUTRAL_BASELINE, sanitizeBodyProfile } from './avatarMeasurements'
 
-export const MANNEQUIN_GLB_PATH = '/models/fashion-mannequin.glb'
+export type MannequinGender = 'female' | 'male'
+
+export const MANNEQUIN_GLB_PATHS: Record<MannequinGender, string> = {
+  female: '/models/fashion-mannequin.glb',
+  male: '/models/fashion-mannequin-male.glb',
+}
+/** Female model; kept for older imports. */
+export const MANNEQUIN_GLB_PATH = MANNEQUIN_GLB_PATHS.female
+
+/**
+ * Body measurements the unmorphed mesh already has, per model. Morph weights are the
+ * difference from these, so a 96 cm chest is "average" on the male form, not oversized.
+ * The male figures are estimates for the MakeHuman male-young ideal-proportions base.
+ */
+const GENDER_BASELINE: Record<MannequinGender, typeof NEUTRAL_BASELINE> = {
+  female: NEUTRAL_BASELINE,
+  male: { ...NEUTRAL_BASELINE, weight_kg: 64, chest: 96, waist: 82, hips: 96, shoulder: 44 },
+}
 
 export const MORPH_INDEX: Record<string, number> = {
   chest_size: 0,
@@ -29,22 +46,24 @@ function clamp(v: number, min: number, max: number): number {
  * for the MakeHuman HM08 Fashion Mannequin GLB asset (/models/fashion-mannequin.glb).
  */
 export function computeMannequinMorphWeights(
-  rawProfile?: Partial<BodyProfile> | null
+  rawProfile?: Partial<BodyProfile> | null,
+  gender: MannequinGender = 'female'
 ): MannequinMorphWeights {
   const p = sanitizeBodyProfile(rawProfile)
+  const base = GENDER_BASELINE[gender]
 
-  const heightScale = p.height_cm / NEUTRAL_BASELINE.height_cm
+  const heightScale = p.height_cm / base.height_cm
 
-  // Normalize circumference deltas relative to NEUTRAL_BASELINE (88 / 72 / 96 / 38)
-  const chestDelta = (p.chest - NEUTRAL_BASELINE.chest) / 28
-  const waistDelta = (p.waist - NEUTRAL_BASELINE.waist) / 26
-  const hipDelta = (p.hips - NEUTRAL_BASELINE.hips) / 28
-  const shoulderDelta = (p.shoulder - NEUTRAL_BASELINE.shoulder) / 9
+  // Normalize circumference deltas relative to the chosen model's own baseline
+  const chestDelta = (p.chest - base.chest) / 28
+  const waistDelta = (p.waist - base.waist) / 26
+  const hipDelta = (p.hips - base.hips) / 28
+  const shoulderDelta = (p.shoulder - base.shoulder) / 9
 
   const hMeters = p.height_cm / 100
   const bmi = p.weight_kg / (hMeters * hMeters)
-  const baseH = NEUTRAL_BASELINE.height_cm / 100
-  const baseBmi = NEUTRAL_BASELINE.weight_kg / (baseH * baseH)
+  const baseH = base.height_cm / 100
+  const baseBmi = base.weight_kg / (baseH * baseH)
   const bmiDelta = (bmi - baseBmi) / 8.5
 
   return {

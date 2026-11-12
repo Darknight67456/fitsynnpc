@@ -11,10 +11,8 @@ import {
   type AvatarDimensions,
 } from './avatarMeasurements'
 import { resolveGarmentMaterial } from './garmentMaterials'
-import {
-  computeMannequinMorphWeights,
-  MANNEQUIN_GLB_PATH,
-} from './mannequinMorphs'
+import { computeMannequinMorphWeights, MANNEQUIN_GLB_PATHS } from './mannequinMorphs'
+import { useMannequinGender } from './mannequinGender'
 
 const SIDES = [-1, 1] as const
 
@@ -195,10 +193,11 @@ function Hm08ProxyGarmentMesh({
   item: ClothingItem
   dims: AvatarDimensions
 }) {
-  const gltf = useGLTF(MANNEQUIN_GLB_PATH)
+  const gender = useMannequinGender()
+  const gltf = useGLTF(MANNEQUIN_GLB_PATHS[gender])
   const weights = useMemo(
-    () => computeMannequinMorphWeights(dims.profile),
-    [dims.profile]
+    () => computeMannequinMorphWeights(dims.profile, gender),
+    [dims.profile, gender]
   )
 
   const geometry = useMemo(() => {
@@ -274,6 +273,7 @@ export default function GarmentMesh({
   dims,
   useGlbProxy = true,
 }: GarmentMeshProps) {
+  const gender = useMannequinGender()
   const { levels: L, radii: R, torsoDepthRatio, fitEase } = dims
   const nameLower = item.name.toLowerCase()
   const tagsLower = (item.tags ?? []).map(t => t.toLowerCase())
@@ -493,7 +493,7 @@ export default function GarmentMesh({
     if (isWatchOrBracelet) {
       // Match the shoulder rotation baked into the GLB, then apply its vertical scale.
       const armRelaxAngle = 0.40
-      const shoulderMorph = computeMannequinMorphWeights(dims.profile).shoulder_width
+      const shoulderMorph = computeMannequinMorphWeights(dims.profile, gender).shoulder_width
       const wristX = -0.43828 - 0.043423 * shoulderMorph + 0.17
       const wristY = 1.00214 - 1.34
       const wx = useGlbProxy
