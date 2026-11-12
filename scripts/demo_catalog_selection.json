@@ -1,0 +1,171 @@
+{
+ "_comment": "Garments kept in the demo catalog, with categories confirmed by the team from the photos (2026-11-11). Everything else in the dataset is left out. Used by scripts/build_demo_catalog.py and scripts/apply_catalog_selection.py.",
+ "confirmed_by": "team visual review",
+ "items": {
+  "1db7556914ff7431": {
+   "category": "top",
+   "sleeve_length": "short_sleeve",
+   "note": null
+  },
+  "e9004a810ce0f497": {
+   "category": "top",
+   "sleeve_length": "short_sleeve",
+   "note": null
+  },
+  "6b14fa87e7140375": {
+   "category": "top",
+   "sleeve_length": "short_sleeve",
+   "note": null
+  },
+  "8ca541740d3c18e4": {
+   "category": "top",
+   "sleeve_length": "short_sleeve",
+   "note": null
+  },
+  "5198338c72506f12": {
+   "category": "outerwear",
+   "sleeve_length": "long_sleeve",
+   "note": "Leather jacket"
+  },
+  "b3936c745715a7bd": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "0fd64df7fe62d544": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "113d44c6cca47197": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "ec08d99a83744795": {
+   "category": "top",
+   "sleeve_length": "long_sleeve",
+   "note": "Knit sweater"
+  },
+  "ac33ccccc45cfeee": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "89a0150f99555b04": {
+   "category": "outerwear",
+   "sleeve_length": "long_sleeve",
+   "note": "Denim jacket"
+  },
+  "c3eaafb18e594af4": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "0e06734bc6510bc3": {
+   "category": "top",
+   "sleeve_length": "long_sleeve",
+   "note": null
+  },
+  "cc012e0b959dbf86": {
+   "category": "top",
+   "sleeve_length": "sleeveless",
+   "note": "Knit vest"
+  },
+  "37a26c70ca45f5fa": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "906f25da873ae7ff": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": "Skirt"
+  },
+  "0395f0420adfac8d": {
+   "category": "top",
+   "sleeve_length": "long_sleeve",
+   "note": null
+  },
+  "219c9c3299d95b3b": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "78a2dd3468647bae": {
+   "category": "top",
+   "sleeve_length": "long_sleeve",
+   "note": null
+  },
+  "149a1a52163fb593": {
+   "category": "outerwear",
+   "sleeve_length": "long_sleeve",
+   "note": "Cardigan"
+  },
+  "19fe01f727369607": {
+   "category": "top",
+   "sleeve_length": "long_sleeve",
+   "note": null
+  },
+  "1b942050a0099adc": {
+   "category": "top",
+   "sleeve_length": "long_sleeve",
+   "note": null
+  },
+  "b037f8d3383ac44b": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "de773dc1fa519905": {
+   "category": "top",
+   "sleeve_length": "long_sleeve",
+   "note": null
+  },
+  "e231f1e3f52606b1": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "e7db7dd047350f86": {
+   "category": "outerwear",
+   "sleeve_length": "long_sleeve",
+   "note": "Cardigan"
+  },
+  "9b8eb456f1546f23": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "2251435a675be87b": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "34e60678c6c5031c": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "a865d2e1ad75da39": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": null
+  },
+  "2f1f3828a66daf7d": {
+   "category": "top",
+   "sleeve_length": "long_sleeve",
+   "note": null
+  },
+  "18e24ec108f1e604": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": "Cargo trousers"
+  },
+  "38c57f1ac892ba59": {
+   "category": "bottom",
+   "sleeve_length": null,
+   "note": "Long skirt"
+  }
+ }
+}

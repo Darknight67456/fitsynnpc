@@ -27,6 +27,57 @@ export function averageColor(data: Uint8ClampedArray, width: number, height: num
   return '#' + hex(r) + hex(g) + hex(b)
 }
 
+// Pure function: the most common color in the center of the picture.
+// Averaging a printed or photographed garment gives a muddy brown, so this groups
+// pixels into coarse color buckets and returns the mean of the biggest bucket instead.
+export function dominantColor(data: Uint8ClampedArray, width: number, height: number): string {
+  const x0 = Math.floor(width * 0.25)
+  const x1 = Math.ceil(width * 0.75)
+  const y0 = Math.floor(height * 0.2)
+  const y1 = Math.ceil(height * 0.8)
+
+  const buckets = new Map<number, { r: number; g: number; b: number; n: number }>()
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      const i = (y * width + x) * 4
+      if (data[i + 3] < 128) continue
+      const r = data[i], g = data[i + 1], b = data[i + 2]
+      const key = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5)
+      const bucket = buckets.get(key) ?? { r: 0, g: 0, b: 0, n: 0 }
+      bucket.r += r; bucket.g += g; bucket.b += b; bucket.n++
+      buckets.set(key, bucket)
+    }
+  }
+
+  let best: { r: number; g: number; b: number; n: number } | null = null
+  for (const bucket of buckets.values()) {
+    if (!best || bucket.n > best.n) best = bucket
+  }
+  if (!best) return '#000000'
+  const n = best.n
+  const hex = (v: number) => Math.round(v / n).toString(16).padStart(2, '0')
+  return '#' + hex(best.r) + hex(best.g) + hex(best.b)
+}
+
+// Downloads a picture by URL and returns its dominant center color as hex.
+export async function detectDominantColorFromUrl(url: string): Promise<string> {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Could not load ${url}`)
+  const bitmap = await createImageBitmap(await res.blob())
+  const size = 80
+  const scale = Math.min(1, size / Math.max(bitmap.width, bitmap.height))
+  const w = Math.max(1, Math.round(bitmap.width * scale))
+  const h = Math.max(1, Math.round(bitmap.height * scale))
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })
+  if (!ctx) throw new Error('Canvas is not available')
+  ctx.drawImage(bitmap, 0, 0, w, h)
+  bitmap.close()
+  return dominantColor(ctx.getImageData(0, 0, w, h).data, w, h)
+}
+
 // Reads the photo, shrinks it to a small size, and returns its main color as hex.
 export async function detectMainColor(file: Blob): Promise<string> {
   const bitmap = await createImageBitmap(file)

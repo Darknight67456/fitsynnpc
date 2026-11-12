@@ -10,6 +10,7 @@ import Outfits from './pages/Outfits'
 import Stylist from './pages/Stylist'
 import Colors from './pages/Colors'
 import ComingSoon from './pages/ComingSoon'
+import DemoCatalog from './pages/DemoCatalog'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path='/reset-password' element={<ResetPassword />} />
           <Route element={<Protected><Layout /></Protected>}>
             <Route path='/' element={<Wardrobe />} />
+            <Route path='/catalog' element={<DemoCatalog />} />
             <Route path='/outfits' element={<Outfits />} />
             <Route path='/stylist' element={<Stylist />} />
             <Route path='/colors' element={<Colors />} />
