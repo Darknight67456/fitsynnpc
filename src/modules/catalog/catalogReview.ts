@@ -1,5 +1,5 @@
 import type { Category } from '../../types'
-import type { CatalogItem, LocalReview, ReviewStatus, SleeveLength } from './catalogTypes'
+import type { CatalogItem, GarmentGender, LocalReview, ReviewStatus, SleeveLength } from './catalogTypes'
 
 /**
  * Review decisions for the Demo Catalog.
@@ -17,6 +17,7 @@ export type ReviewMap = Record<string, LocalReview>
 const CATEGORIES: Category[] = ['top', 'bottom', 'outerwear', 'dress', 'shoes', 'accessory']
 const STATUSES: ReviewStatus[] = ['pending', 'approved', 'rejected']
 const SLEEVES: SleeveLength[] = ['short_sleeve', 'long_sleeve', 'sleeveless']
+const GENDERS: GarmentGender[] = ['unisex', 'female', 'male']
 
 let cache: ReviewMap | null = null
 const listeners = new Set<() => void>()
@@ -64,6 +65,7 @@ export function setRightsConfirmed(item: CatalogItem, confirmed: boolean) {
     category: item.local?.category ?? item.review.category,
     name: item.local?.name ?? item.review.name ?? '',
     sleeve_length: item.local ? item.local.sleeve_length : item.sleeveLength,
+    gender: item.genderConfirmed ? item.gender : null,
     rights_confirmed: confirmed,
   })
 }
@@ -93,6 +95,7 @@ export function sanitizeReviews(input: unknown): { reviews: ReviewMap; skipped: 
       STATUSES.includes(v.status as ReviewStatus) &&
       (v.category === null || CATEGORIES.includes(v.category as Category)) &&
       (v.sleeve_length === null || SLEEVES.includes(v.sleeve_length as SleeveLength)) &&
+      (v.gender === undefined || v.gender === null || GENDERS.includes(v.gender)) &&
       typeof v.rights_confirmed === 'boolean'
     if (!ok) {
       skipped++
@@ -104,6 +107,7 @@ export function sanitizeReviews(input: unknown): { reviews: ReviewMap; skipped: 
       name: typeof v.name === 'string' ? v.name.slice(0, 80) : '',
       sleeve_length: (v.sleeve_length ?? null) as SleeveLength | null,
       rights_confirmed: v.rights_confirmed as boolean,
+      gender: v.gender ?? null,
       reviewed_at: typeof v.reviewed_at === 'string' ? v.reviewed_at : new Date().toISOString(),
     }
   }

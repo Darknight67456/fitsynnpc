@@ -60,6 +60,29 @@ function explicitSleeve(item: ClothingItem): 'long' | 'short' | null {
   return null
 }
 
+/** Catalog garment types worn as a long-sleeved tunic over a separate lower piece. */
+// Upper and lower mesh for each two-piece outfit. A floor-length dress mesh stands in for
+// a long skirt or sarong; the upper piece is drawn on top of it.
+const TWO_PIECE: Record<string, { upper: string; lower: string }> = {
+  'type:kurta_set': { upper: 'GarmentTopKurung', lower: 'GarmentTrousers' },
+  'type:salwar_kameez': { upper: 'GarmentTopKurung', lower: 'GarmentTrousers' },
+  'type:baju_kurung': { upper: 'GarmentTopKurung', lower: 'GarmentDressMaxi' },
+  'type:kebaya': { upper: 'GarmentTopKurung', lower: 'GarmentDressMaxi' },
+  'type:lehenga': { upper: 'GarmentTopBlouse', lower: 'GarmentDressMaxi' },
+}
+
+function twoPieceShape(
+  item: ClothingItem
+): { upper: string; lower: string; lowerColor: string | null } | null {
+  // Only full outfits; a kebaya sold on its own is a "top" and keeps the normal top shape.
+  if (item.category !== 'dress') return null
+  const tags = item.tags ?? []
+  const tag = tags.find(t => t in TWO_PIECE)
+  if (!tag) return null
+  const lowerColor = tags.find(t => t.startsWith('lower-color:'))?.slice('lower-color:'.length) ?? null
+  return { ...TWO_PIECE[tag], lowerColor }
+}
+
 function resolveHm08ProxyMeshName(item: ClothingItem): string | null {
   const nameLower = item.name.toLowerCase()
   const tagsLower = (item.tags ?? []).map(t => t.toLowerCase())
@@ -188,10 +211,13 @@ function Hm08ProxyGarmentMesh({
   meshName,
   item,
   dims,
+  offsetFactor: offsetOverride,
 }: {
   meshName: string
   item: ClothingItem
   dims: AvatarDimensions
+  /** Depth bias; more negative draws in front of overlapping garments. */
+  offsetFactor?: number
 }) {
   const gender = useMannequinGender()
   const gltf = useGLTF(MANNEQUIN_GLB_PATHS[gender])
@@ -221,11 +247,12 @@ function Hm08ProxyGarmentMesh({
   if (!geometry) return null
 
   const offsetFactor =
-    item.category === 'outerwear'
+    offsetOverride ??
+    (item.category === 'outerwear'
       ? -2
       : item.category === 'accessory'
       ? -3
-      : -1
+      : -1)
 
   const isBelt = meshName === 'GarmentBelt'
 
@@ -437,6 +464,23 @@ export default function GarmentMesh({
       }),
     [dims, legCutScale, isShorts, L.knee, L.ankle]
   )
+
+  // Two-piece traditional outfits stored as one catalog "dress": draw the long tunic and the
+  // separate lower garment (draped trousers for a kurta set, a long skirt for baju kurung).
+  const twoPiece = useGlbProxy ? twoPieceShape(item) : null
+  if (twoPiece) {
+    return (
+      <group name={`garment-two-piece-${item.id}`}>
+        <Hm08ProxyGarmentMesh
+          meshName={twoPiece.lower}
+          item={{ ...item, category: 'bottom', color: twoPiece.lowerColor ?? item.color }}
+          dims={dims}
+        />
+        {/* Pushed further forward so the tunic or blouse always covers the skirt's bodice. */}
+        <Hm08ProxyGarmentMesh meshName={twoPiece.upper} item={item} dims={dims} offsetFactor={-2} />
+      </group>
+    )
+  }
 
   // If HM08 topology proxy mesh is active for this item, render the morph-synced GLB sub-mesh
   if (hm08MeshName) {

@@ -24,7 +24,7 @@ export function demoTryOnId(item: CatalogItem): string {
  * Converts a catalog item into the ClothingItem shape the AI Try-On panel
  * already understands. This object lives in memory only; it is never saved.
  */
-export function toTryOnClothingItem(item: CatalogItem, color?: string): ClothingItem {
+export function toTryOnClothingItem(item: CatalogItem, color?: string, lowerColor?: string): ClothingItem {
   const absoluteImage =
     typeof window !== 'undefined' ? new URL(item.imageUrl, window.location.origin).href : item.imageUrl
   return {
@@ -40,7 +40,15 @@ export function toTryOnClothingItem(item: CatalogItem, color?: string): Clothing
     formality: 3,
     formality_levels: null,
     // The sleeve tag lets the 3D mannequin pick a short- or long-sleeve garment shape.
-    tags: ['demo-catalog', item.source_group, ...(item.sleeveLength ? [sleeveTag(item.sleeveLength)] : [])],
+    tags: [
+      'demo-catalog',
+      item.source_group,
+      ...(item.sleeveLength ? [sleeveTag(item.sleeveLength)] : []),
+      // e.g. "type:kurta_set": lets the 3D preview pick a matching garment shape.
+      ...(item.details ? [`type:${item.details.garment_type}`] : []),
+      // Color of the trousers or skirt of a two-piece outfit, when it differs from the tunic.
+      ...(lowerColor ? [`lower-color:${lowerColor}`] : []),
+    ],
     wear_count: 0,
     last_worn_at: null,
   }

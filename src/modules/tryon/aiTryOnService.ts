@@ -334,6 +334,12 @@ interface EdgeTryOnReply {
 async function callEdge(body: Record<string, unknown>): Promise<EdgeTryOnReply> {
   const { data, error } = await supabase.functions.invoke('catvton-tryon', { body })
   if (error) {
+    // A non-2xx reply still carries the function's own message (e.g. "Please log in again."); show that.
+    const context = (error as { context?: unknown }).context
+    if (context instanceof Response) {
+      const detail = (await context.json().catch(() => null)) as EdgeTryOnReply | null
+      if (detail?.message) throw new Error(detail.message)
+    }
     throw new Error(`The try-on service could not be reached (${error.message}). Check your connection and try again.`)
   }
   const reply = data as EdgeTryOnReply | null

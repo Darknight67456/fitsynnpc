@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import Button from '../../components/Button'
 import type { Category } from '../../types'
-import { CATEGORY_OPTIONS, FLAG_LABEL, SLEEVE_OPTIONS } from './catalogLabels'
+import { CATEGORY_OPTIONS, FLAG_LABEL, GENDER_OPTIONS, SLEEVE_OPTIONS, codeLabel } from './catalogLabels'
 import { clearReview, saveReview } from './catalogReview'
-import type { CatalogItem, ReviewStatus, SleeveLength } from './catalogTypes'
+import type { CatalogItem, GarmentGender, ReviewStatus, SleeveLength } from './catalogTypes'
 import { tryOnBlockReason } from './demoGarment'
 
 interface Props {
@@ -18,6 +18,7 @@ export default function CatalogPreview({ item, onClose, onUseForTryOn }: Props) 
   const [name, setName] = useState(item.local?.name ?? item.review.name ?? '')
   const [sleeve, setSleeve] = useState<SleeveLength | ''>(item.sleeveLength ?? '')
   const [rights, setRights] = useState(item.rightsConfirmed)
+  const [gender, setGender] = useState<GarmentGender | ''>(item.genderConfirmed ? item.gender : '')
   const [saved, setSaved] = useState('')
 
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function CatalogPreview({ item, onClose, onUseForTryOn }: Props) 
       name: name.trim(),
       sleeve_length: sleeveRelevant && sleeve ? sleeve : null,
       rights_confirmed: rights,
+      gender: gender || null,
     })
     setSaved(
       status === 'approved'
@@ -95,6 +97,40 @@ export default function CatalogPreview({ item, onClose, onUseForTryOn }: Props) 
             </div>
           )}
 
+          {item.details && (
+            <dl className='space-y-1 text-[11px]'>
+              <div>
+                <dt className='inline text-muted'>Type: </dt>
+                <dd className='inline font-medium'>
+                  {codeLabel(item.details.garment_type)} · {codeLabel(item.details.item_kind)}
+                </dd>
+              </div>
+              <div>
+                <dt className='text-muted'>Occasions</dt>
+                <dd>
+                  <ul className='mt-0.5 space-y-0.5'>
+                    {item.details.occasions.map(o => (
+                      <li key={o.code}>
+                        <span className='font-medium'>{codeLabel(o.code)}</span>
+                        {o.condition && <span className='text-muted'> ({o.condition})</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+              <div>
+                <dt className='inline text-muted'>Themes: </dt>
+                <dd className='inline'>{item.details.themes.map(codeLabel).join(', ')}</dd>
+              </div>
+              {item.details.review_note && (
+                <div className='rounded-lg bg-amber-50 p-2 text-amber-950'>
+                  <dt className='font-semibold'>Check before approving</dt>
+                  <dd>{item.details.review_note}</dd>
+                </div>
+              )}
+            </dl>
+          )}
+
           {item.suggested.category && (
             <p className='text-[11px] text-muted'>
               Suggested: <span className='font-medium text-ink'>{item.suggested.category}</span>
@@ -139,6 +175,22 @@ export default function CatalogPreview({ item, onClose, onUseForTryOn }: Props) 
                 </select>
               </label>
             )}
+
+            <label className='block text-xs font-medium'>
+              Gender
+              <select
+                className='mt-1 w-full rounded-lg border border-ink/20 bg-surface px-2 py-1.5 text-sm'
+                value={gender}
+                onChange={e => setGender(e.target.value as GarmentGender | '')}
+              >
+                <option value=''>Not set (using {item.genderConfirmed ? 'unisex' : item.gender})</option>
+                {GENDER_OPTIONS.map(o => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
 
             <label className='block text-xs font-medium'>
               Display name

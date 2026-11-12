@@ -65,7 +65,7 @@ export function useDemoCatalog() {
       const local = reviews[raw.id] ?? null
       const confirmedCategory = local?.category ?? raw.review.category
       const category = confirmedCategory ?? raw.suggested.category
-      const name = local?.name?.trim() || raw.review.name?.trim() || ''
+      const name = local?.name?.trim() || raw.review.name?.trim() || raw.display_name?.trim() || ''
       return {
         ...raw,
         imageUrl: `${DEMO_CATALOG_BASE}${raw.image}`,
@@ -83,6 +83,8 @@ export function useDemoCatalog() {
             : raw.suggested.sleeve_length,
         status: local?.status ?? raw.review.status,
         rightsConfirmed: local?.rights_confirmed ?? raw.review.rights_confirmed,
+        gender: local?.gender ?? raw.review.gender ?? raw.suggested.gender ?? 'unisex',
+        genderConfirmed: Boolean(local?.gender ?? raw.review.gender),
       }
     })
   }, [file, reviews])

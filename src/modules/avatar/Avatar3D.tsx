@@ -13,9 +13,10 @@ import GarmentMesh from './GarmentMesh'
 import MannequinPedestal, { PEDESTAL_FLOOR_Y } from './MannequinPedestal'
 import FittingRoomStage from './FittingRoomStage'
 import { MannequinGenderContext } from './mannequinGender'
+import { setMannequinGender, useSelectedMannequinGender } from './mannequinGenderStore'
+import { PREVIEW_FRAME_HEIGHT } from './previewFrame'
 import type { MannequinGender } from './mannequinMorphs'
 
-const GENDER_KEY = 'fitsync.mannequinGender'
 // Plain studio colour behind the mannequin in the CatVTON capture (the worker expects a flat background).
 const CAPTURE_BACKGROUND = new Color('#ece9e3')
 
@@ -44,16 +45,8 @@ function useBackdropPhoto(url: string): boolean {
   return ready
 }
 
-function readGender(): MannequinGender {
-  try {
-    return localStorage.getItem(GENDER_KEY) === 'male' ? 'male' : 'female'
-  } catch {
-    return 'female'
-  }
-}
 
 export type CameraView = 'front' | 'side' | 'back' | 'reset'
-
 export interface FrontCaptureOptions {
   /** Garment categories left out of this capture only (e.g. outerwear for a layered try-on). */
   hideCategories?: Category[]
@@ -235,12 +228,18 @@ export default function Avatar3D({
   autoRotate = false,
   onAutoRotateChange,
   onRegisterFrontCapture,
+  showProfileBadge = true,
+  note,
 }: {
   profile: BodyProfile
   worn: ClothingItem[]
   autoRotate?: boolean
   onAutoRotateChange?: (spinning: boolean) => void
   onRegisterFrontCapture?: (captureFn: FrontCaptureFn) => void
+  /** Show height/weight/tone in the corner (off when the page shows its own summary). */
+  showProfileBadge?: boolean
+  /** Extra corner note, e.g. "Approximate 3D Preview". */
+  note?: string
 }) {
   const dims = useMemo(() => computeAvatarDimensions(profile), [profile])
   const [preset, setPreset] = useState<{ view: CameraView; seq: number }>({
@@ -248,17 +247,9 @@ export default function Avatar3D({
     seq: 0,
   })
   const [manualOrbited, setManualOrbited] = useState(false)
-  const [gender, setGender] = useState<MannequinGender>(readGender)
+  const gender = useSelectedMannequinGender()
   const hasBackdrop = useBackdropPhoto(BACKDROP_URL)
-
-  function chooseGender(next: MannequinGender) {
-    setGender(next)
-    try {
-      localStorage.setItem(GENDER_KEY, next)
-    } catch {
-      // Storage blocked: the choice still applies for this visit.
-    }
-  }
+  const chooseGender = (next: MannequinGender) => setMannequinGender(next)
 
   // Only highlight a preset button when not auto-rotating and not manually orbited away
   const activeView: 'front' | 'side' | 'back' | null =
@@ -291,7 +282,7 @@ export default function Avatar3D({
 
   return (
     <div
-      className='relative h-[430px] w-full overflow-hidden rounded-xl border border-ink/10 bg-gradient-to-b from-[#f5f3ef] via-[#edeae3] to-[#e1dcd3] sm:h-[460px] md:h-[500px] lg:h-[540px] xl:h-[560px]'
+      className={`relative w-full overflow-hidden rounded-xl border border-ink/10 bg-gradient-to-b from-[#f5f3ef] via-[#edeae3] to-[#e1dcd3] ${PREVIEW_FRAME_HEIGHT}`}
       data-testid='avatar-viewport'
       style={
         hasBackdrop
@@ -299,7 +290,14 @@ export default function Avatar3D({
           : undefined
       }
     >
+      {note && (
+        <div className='pointer-events-none absolute bottom-3 right-3 z-10 rounded-lg border border-ink/10 bg-white/90 px-2 py-1 text-[11px] font-medium text-muted shadow-sm'>
+          {note}
+        </div>
+      )}
+
       {/* Top-left parametric profile summary badge */}
+      {showProfileBadge && (
       <div className='pointer-events-none absolute left-3 top-3 z-10 flex flex-wrap items-center gap-1.5 rounded-lg border border-ink/10 bg-white/90 px-2.5 py-1.5 text-xs text-ink shadow-sm backdrop-blur-sm'>
         <span className='font-semibold text-brand'>{dims.profile.height_cm} cm</span>
         <span className='text-muted'>·</span>
@@ -309,6 +307,7 @@ export default function Avatar3D({
         <span className='hidden text-muted sm:inline'>·</span>
         <span className='hidden capitalize sm:inline'>{dims.profile.fit_pref} fit</span>
       </div>
+      )}
 
       {/* Top-right interactive camera view buttons */}
       <div className='absolute right-3 top-3 z-10 flex items-center gap-1 rounded-lg border border-ink/10 bg-white/90 p-1 shadow-sm backdrop-blur-sm'>

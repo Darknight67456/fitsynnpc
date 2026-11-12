@@ -272,6 +272,8 @@ def main():
                 "status": "pending",
                 "category": chosen["category"] if chosen else None,
                 "sleeve_length": chosen["sleeve_length"] if chosen else None,
+                # "unisex" | "female" | "male"; None until the team sets it.
+                "gender": chosen.get("gender") if chosen else None,
                 "name": None,
                 "rights_confirmed": False,
             },

@@ -5,9 +5,9 @@ import Card from '../components/Card'
 import Button from '../components/Button'
 import type { Category } from '../types'
 import CatalogPreview from '../modules/catalog/CatalogPreview'
-import { CATEGORY_OPTIONS, FLAG_LABEL, SOURCE_OPTIONS } from '../modules/catalog/catalogLabels'
+import { CATEGORY_OPTIONS, FLAG_LABEL, GENDER_OPTIONS, SOURCE_OPTIONS } from '../modules/catalog/catalogLabels'
 import { buildReviewExport, importReviews } from '../modules/catalog/catalogReview'
-import type { CatalogItem, ReviewStatus } from '../modules/catalog/catalogTypes'
+import type { CatalogItem, GarmentGender, ReviewStatus } from '../modules/catalog/catalogTypes'
 import { tryOnBlockReason } from '../modules/catalog/demoGarment'
 import { useDemoCatalog } from '../modules/catalog/useDemoCatalog'
 
@@ -27,6 +27,7 @@ export default function DemoCatalog() {
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [source, setSource] = useState<SourceFilter>('all')
   const [status, setStatus] = useState<StatusFilter>('all')
+  const [gender, setGender] = useState<'all' | GarmentGender>('all')
   const [readyOnly, setReadyOnly] = useState(false)
   const [previewId, setPreviewId] = useState<string | null>(null)
   const [notice, setNotice] = useState('')
@@ -54,10 +55,11 @@ export default function DemoCatalog() {
         if (source === 'team' && !i.source_group.startsWith('team_photos')) return false
         if (source !== 'all' && source !== 'team' && i.source_group !== source) return false
         if (status !== 'all' && i.status !== status) return false
+        if (gender !== 'all' && i.gender !== gender) return false
         if (readyOnly && tryOnBlockReason(i) !== null) return false
         return true
       }),
-    [items, category, source, status, readyOnly]
+    [items, category, source, status, gender, readyOnly]
   )
 
   const preview = previewId ? items.find(i => i.id === previewId) ?? null : null
@@ -195,6 +197,21 @@ export default function DemoCatalog() {
                 </select>
               </label>
               <label className='flex items-center gap-1.5'>
+                Gender
+                <select
+                  className='rounded-lg border border-ink/20 bg-surface px-2 py-1'
+                  value={gender}
+                  onChange={e => setGender(e.target.value as 'all' | GarmentGender)}
+                >
+                  <option value='all'>All</option>
+                  {GENDER_OPTIONS.map(o => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className='flex items-center gap-1.5'>
                 <input type='checkbox' checked={readyOnly} onChange={e => setReadyOnly(e.target.checked)} />
                 AI Try-On ready only ({counts.ready})
               </label>
@@ -245,6 +262,15 @@ export default function DemoCatalog() {
                           {!item.categoryConfirmed && item.category ? '?' : ''}
                         </span>
                         <span className={`rounded-full px-1.5 py-0.5 ${STATUS_STYLE[item.status]}`}>{item.status}</span>
+                        <span
+                          className={`rounded-full px-1.5 py-0.5 ${
+                            item.genderConfirmed ? 'bg-ink/5 text-ink' : 'border border-dashed border-ink/30 text-muted'
+                          }`}
+                          title={item.genderConfirmed ? 'Gender set' : 'Suggested gender, not confirmed yet'}
+                        >
+                          {item.gender}
+                          {item.genderConfirmed ? '' : '?'}
+                        </span>
                         <span className='rounded-full bg-ink/5 px-1.5 py-0.5 text-muted'>{item.origin.label}</span>
                         {!item.rightsConfirmed && (
                           <span className='rounded-full bg-amber-100 px-1.5 py-0.5 text-amber-900'>rights pending</span>

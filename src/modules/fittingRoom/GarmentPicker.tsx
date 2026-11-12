@@ -60,7 +60,12 @@ export default function GarmentPicker({
 
   return (
     <div>
-      <div className='mb-3 grid grid-cols-3 rounded-lg border border-ink/15 p-0.5 text-sm' role='tablist' aria-label='Where to pick clothes from'>
+      <div
+        className='mb-3 grid rounded-lg border border-ink/15 p-0.5 text-sm'
+        style={{ gridTemplateColumns: `repeat(${sources.length}, minmax(0, 1fr))` }}
+        role='tablist'
+        aria-label='Where to pick clothes from'
+      >
         {sources.map(s => (
           <button
             key={s.id}
@@ -109,7 +114,7 @@ export default function GarmentPicker({
       ) : source.items.length === 0 ? (
         <div className='rounded-lg border border-dashed border-ink/20 p-4 text-sm text-muted'>{source.empty}</div>
       ) : (
-        <ul className='grid max-h-[520px] grid-cols-3 gap-2 overflow-y-auto pr-1 sm:grid-cols-4'>
+        <ul className='grid grid-cols-3 gap-2 sm:grid-cols-4'>
           {visible.map(item => {
             const on = wornIds.has(item.id)
             const img = thumbs?.get(item.id) ?? item.image_url

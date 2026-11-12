@@ -16,3 +16,9 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
 }
+
+/* Visible keyboard focus everywhere, in the brand purple. Mouse clicks do not show it. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}

@@ -8,6 +8,7 @@ import { ACCESSORY_TYPES, FORMALITY, SEASONS, labelOf } from '../modules/wardrob
 import Button from '../components/Button'
 import Card from '../components/Card'
 import { Select } from '../components/Field'
+import SavedLooks from '../modules/fittingRoom/SavedLooks'
 
 const THEMES = [
   'Office day', 'Job interview', 'Wedding guest', 'Hari Raya visit', 'Date night',
@@ -191,13 +192,15 @@ export default function Outfits() {
                   variant='secondary'
                   onClick={() => navigate(`/visualizer?items=${encodeURIComponent(o.item_ids.join(','))}`)}
                 >
-                  Preview in 3D Try-on
+                  Open in fitting room
                 </Button>
               </div>
             </Card>
           ))}
         </div>
       )}
+
+      <SavedLooks />
     </div>
   )
 }
