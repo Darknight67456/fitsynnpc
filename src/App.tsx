@@ -10,6 +10,8 @@ import Outfits from './pages/Outfits'
 import Stylist from './pages/Stylist'
 import Colors from './pages/Colors'
 import ComingSoon from './pages/ComingSoon'
+import DemoCatalog from './pages/DemoCatalog'
+import Size from './pages/Size'
 
 export default function App() {
   return (
@@ -20,11 +22,12 @@ export default function App() {
           <Route path='/reset-password' element={<ResetPassword />} />
           <Route element={<Protected><Layout /></Protected>}>
             <Route path='/' element={<Wardrobe />} />
+            <Route path='/catalog' element={<DemoCatalog />} />
             <Route path='/outfits' element={<Outfits />} />
             <Route path='/stylist' element={<Stylist />} />
             <Route path='/colors' element={<Colors />} />
             <Route path='/visualizer' element={<Visualizer />} />
-            <Route path='/size' element={<ComingSoon title='Size and fit' />} />
+            <Route path='/size' element={<Size />} />
             <Route path='/insights' element={<ComingSoon title='Insights' />} />
           </Route>
         </Routes>

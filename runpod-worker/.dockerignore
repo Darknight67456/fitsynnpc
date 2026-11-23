@@ -1,0 +1,8 @@
+# Keep the RunPod build context small: only the worker code is needed.
+__pycache__/
+*.pyc
+_backup*/
+samples/
+*.ipynb
+*.zip
+gpu_smoke_*.png

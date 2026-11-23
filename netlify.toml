@@ -1,0 +1,25 @@
+# Netlify build for FitSync (Vite + React SPA).
+# Set VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY and VITE_TRYON_MODE in
+# Netlify > Site configuration > Environment variables. Never put RunPod keys here.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# React Router: every path serves index.html (same rule as public/_redirects).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Large 3D models and catalog images rarely change: let browsers cache them.
+[[headers]]
+  for = "/models/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+[[headers]]
+  for = "/demo-catalog/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"

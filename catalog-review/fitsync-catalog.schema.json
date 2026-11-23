@@ -1,0 +1,468 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fitsync.app/schemas/fitsync-catalog.en.json",
+  "title": "FitSync clothing catalog (English)",
+  "description": "One record per source image. Occasions and themes are recommendation hints and are kept separate from FitSync's 1-5 formality scale (formality, formality_levels).",
+  "type": "object",
+  "required": [
+    "schema",
+    "generated_on",
+    "source_archive",
+    "language",
+    "items"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "fitsync-catalog/2"
+    },
+    "generated_on": {
+      "type": "string",
+      "format": "date"
+    },
+    "source_archive": {
+      "type": "string"
+    },
+    "language": {
+      "const": "en"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    }
+  },
+  "$defs": {
+    "code_occasion": {
+      "enum": [
+        "casual_gathering",
+        "chinese_new_year",
+        "deepavali",
+        "dinner",
+        "everyday",
+        "formal_event",
+        "hari_raya",
+        "office",
+        "smart_casual",
+        "wedding"
+      ]
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "image_path",
+        "file_name",
+        "sha256",
+        "file_bytes",
+        "width",
+        "height",
+        "duplicate_of",
+        "review_status",
+        "review_note",
+        "category",
+        "garment_type",
+        "item_kind",
+        "gender",
+        "display_name",
+        "occasions",
+        "themes",
+        "visual_evidence",
+        "formality",
+        "formality_levels"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{16}$",
+          "description": "First 16 hex characters of the SHA-256 of image_path. Stable per file path."
+        },
+        "image_path": {
+          "type": "string",
+          "description": "Original path inside the source archive, unchanged."
+        },
+        "file_name": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 of the image bytes."
+        },
+        "file_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "width": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "height": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "duplicate_of": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{16}$",
+          "description": "id of the first byte-identical image, verified by sha256."
+        },
+        "review_status": {
+          "enum": [
+            "classified",
+            "needs_review",
+            "no_item"
+          ]
+        },
+        "review_note": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Required for needs_review: what exactly must be checked."
+        },
+        "category": {
+          "enum": [
+            "top",
+            "bottom",
+            "dress",
+            "outerwear",
+            "shoes",
+            "accessory"
+          ],
+          "description": "FitSync category. 'dress' covers dresses and complete outfits."
+        },
+        "garment_type": {
+          "enum": [
+            "baggy_jeans",
+            "baju_kurung",
+            "batwing_top",
+            "beaded_mules",
+            "blouse",
+            "boxy_tshirt",
+            "button_down_shirt",
+            "camp_collar_shirt",
+            "capelet_top",
+            "cardigan",
+            "cargo_trousers",
+            "chinos",
+            "cropped_shirt",
+            "denim_jacket",
+            "denim_maxi_skirt",
+            "drawstring_trousers",
+            "flannel_shirt",
+            "graphic_tshirt",
+            "halter_top",
+            "henley_sweater",
+            "henley_tshirt",
+            "kebaya",
+            "knit_polo",
+            "kurta_set",
+            "layered_long_sleeve_tshirt",
+            "lehenga",
+            "long_sleeve_tshirt",
+            "maxi_dress",
+            "maxi_skirt",
+            "midi_dress",
+            "midi_skirt",
+            "mini_dress",
+            "mini_skirt",
+            "off_shoulder_top",
+            "polo_shirt",
+            "polo_sweater",
+            "pyjama_trousers",
+            "qipao",
+            "qipao_top",
+            "raglan_tshirt",
+            "ringer_tshirt",
+            "salwar_kameez",
+            "sari",
+            "shrug_and_tube_top",
+            "straight_leg_jeans",
+            "sweater",
+            "sweatshirt",
+            "tie_front_blouse",
+            "tshirt",
+            "vest",
+            "wide_leg_jeans",
+            "wide_leg_sweatpants",
+            "wide_leg_trousers",
+            "wrap_blouse",
+            "wrap_top",
+            "wrap_trousers"
+          ]
+        },
+        "item_kind": {
+          "enum": [
+            "draped_garment",
+            "set",
+            "single_item",
+            "uncertain"
+          ]
+        },
+        "gender": {
+          "enum": [
+            "female",
+            "male",
+            "unisex"
+          ],
+          "description": "Who the garment is cut for; unisex shows on both mannequins."
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "occasions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "description": "Strongest match first.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "condition"
+            ],
+            "properties": {
+              "code": {
+                "$ref": "#/$defs/code_occasion"
+              },
+              "condition": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "When suitability depends on styling or dress code."
+              }
+            }
+          }
+        },
+        "themes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "athleisure",
+              "bohemian",
+              "classic",
+              "cosy",
+              "elegant",
+              "festive",
+              "gothic",
+              "grunge",
+              "minimalist",
+              "modest",
+              "playful",
+              "preppy",
+              "resort",
+              "retro",
+              "romantic",
+              "sporty",
+              "streetwear",
+              "traditional",
+              "utilitarian",
+              "whimsical"
+            ]
+          }
+        },
+        "visual_evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 2
+          }
+        },
+        "formality": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5,
+          "description": "FitSync's existing 1-5 formality scale. Not set by this image review."
+        },
+        "formality_levels": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "uniqueItems": true,
+          "description": "FitSync's existing formality range. Not set by this image review."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "review_status": {
+                "const": "needs_review"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "review_note": {
+                "type": "string",
+                "minLength": 10
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "review_status": {
+                "const": "classified"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "review_note": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "x-display-labels": {
+    "category": {
+      "top": "Top",
+      "bottom": "Bottom",
+      "dress": "Dress or full outfit",
+      "outerwear": "Outerwear",
+      "shoes": "Shoes",
+      "accessory": "Accessory"
+    },
+    "item_kind": {
+      "single_item": "Single item",
+      "set": "Set (several matching pieces)",
+      "draped_garment": "Draped garment",
+      "uncertain": "Uncertain"
+    },
+    "review_status": {
+      "classified": "Classified",
+      "needs_review": "Needs review",
+      "no_item": "No garment shown"
+    },
+    "gender": {
+      "unisex": "Unisex",
+      "female": "Female",
+      "male": "Male"
+    },
+    "occasion": {
+      "everyday": "Everyday",
+      "smart_casual": "Smart casual",
+      "office": "Office",
+      "casual_gathering": "Casual gathering",
+      "dinner": "Dinner",
+      "formal_event": "Formal event",
+      "wedding": "Wedding",
+      "hari_raya": "Hari Raya",
+      "chinese_new_year": "Chinese New Year",
+      "deepavali": "Deepavali"
+    },
+    "theme": {
+      "minimalist": "Minimalist",
+      "classic": "Classic",
+      "preppy": "Preppy",
+      "retro": "Retro",
+      "streetwear": "Streetwear",
+      "utilitarian": "Utilitarian",
+      "athleisure": "Athleisure",
+      "sporty": "Sporty",
+      "cosy": "Cosy",
+      "grunge": "Grunge",
+      "resort": "Resort",
+      "bohemian": "Bohemian",
+      "romantic": "Romantic",
+      "elegant": "Elegant",
+      "gothic": "Gothic",
+      "playful": "Playful",
+      "whimsical": "Whimsical",
+      "modest": "Modest",
+      "traditional": "Traditional",
+      "festive": "Festive"
+    },
+    "garment_type": {
+      "tshirt": "T-shirt",
+      "graphic_tshirt": "Graphic T-shirt",
+      "ringer_tshirt": "Ringer T-shirt",
+      "raglan_tshirt": "Raglan T-shirt",
+      "boxy_tshirt": "Boxy T-shirt",
+      "long_sleeve_tshirt": "Long-sleeve T-shirt",
+      "layered_long_sleeve_tshirt": "Layered-sleeve T-shirt",
+      "henley_tshirt": "Henley T-shirt",
+      "polo_shirt": "Polo shirt",
+      "knit_polo": "Knit polo",
+      "polo_sweater": "Polo sweater",
+      "sweater": "Sweater",
+      "henley_sweater": "Henley sweater",
+      "sweatshirt": "Sweatshirt",
+      "button_down_shirt": "Button-up shirt",
+      "camp_collar_shirt": "Camp-collar shirt",
+      "flannel_shirt": "Flannel shirt",
+      "cropped_shirt": "Cropped shirt",
+      "blouse": "Blouse",
+      "wrap_blouse": "Wrap blouse",
+      "wrap_top": "Wrap top",
+      "tie_front_blouse": "Tie-front blouse",
+      "off_shoulder_top": "Off-shoulder top",
+      "batwing_top": "Batwing top",
+      "halter_top": "Halter top",
+      "capelet_top": "Capelet top",
+      "shrug_and_tube_top": "Shrug and tube top",
+      "vest": "Vest",
+      "qipao_top": "Qipao top",
+      "kebaya": "Kebaya",
+      "cardigan": "Cardigan",
+      "denim_jacket": "Denim jacket",
+      "straight_leg_jeans": "Straight-leg jeans",
+      "wide_leg_jeans": "Wide-leg jeans",
+      "baggy_jeans": "Baggy jeans",
+      "chinos": "Chinos",
+      "cargo_trousers": "Cargo trousers",
+      "drawstring_trousers": "Drawstring trousers",
+      "wide_leg_trousers": "Wide-leg trousers",
+      "wrap_trousers": "Wrap trousers",
+      "wide_leg_sweatpants": "Wide-leg sweatpants",
+      "pyjama_trousers": "Pyjama-style trousers",
+      "mini_skirt": "Mini skirt",
+      "midi_skirt": "Midi skirt",
+      "maxi_skirt": "Maxi skirt",
+      "denim_maxi_skirt": "Denim maxi skirt",
+      "mini_dress": "Mini dress",
+      "midi_dress": "Midi dress",
+      "maxi_dress": "Maxi dress",
+      "qipao": "Qipao",
+      "baju_kurung": "Baju kurung",
+      "sari": "Sari",
+      "lehenga": "Lehenga",
+      "salwar_kameez": "Salwar kameez",
+      "kurta_set": "Kurta set",
+      "beaded_mules": "Beaded mules"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   colorCheck, colorMatch, colorSelfie, detectUndertone,
   type ColorCheckResult, type ColorMatchResult, type ColorPayload, type ColorSelfieResult, type Undertone, type UndertoneResult,
@@ -59,6 +60,7 @@ function ItemButton({ item, selected, onClick }: { item: ClothingItem; selected:
 
 export default function Colors() {
   const { items } = useWardrobe()
+  const navigate = useNavigate()
   const { profile, setProfile, save, loading: profileLoading } = useBodyProfile()
   const byId = useMemo(() => new Map(items.map(i => [i.id, i])), [items])
 
@@ -257,6 +259,13 @@ export default function Colors() {
                         <p className='text-xs text-muted'>Color {p.color_score} · Style (learned from outfits) {p.style_score}</p>
                       )}
                       <p className='text-xs'>{p.reason}</p>
+                      <button
+                        type='button'
+                        onClick={() => navigate(`/visualizer?items=${encodeURIComponent(`${anchor.id},${it.id}`)}`)}
+                        className='mt-1 inline-block text-xs font-medium text-brand hover:underline'
+                      >
+                        Preview pair in 3D Try-on →
+                      </button>
                     </div>
                   )
                 })}
@@ -273,7 +282,17 @@ export default function Colors() {
             <div className='grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-6'>
               {items.map(i => <ItemButton key={i.id} item={i} selected={picked.includes(i.id)} onClick={() => toggle(i.id)} />)}
             </div>
-            <Button onClick={() => void runCheck()} disabled={busy || picked.length < 2}>{busy ? 'Checking...' : 'Check the colors'}</Button>
+            <div className='flex flex-wrap items-center gap-2'>
+              <Button onClick={() => void runCheck()} disabled={busy || picked.length < 2}>{busy ? 'Checking...' : 'Check the colors'}</Button>
+              {picked.length >= 1 && (
+                <Button
+                  variant='secondary'
+                  onClick={() => navigate(`/visualizer?items=${encodeURIComponent(picked.join(','))}`)}
+                >
+                  Preview in 3D Try-on
+                </Button>
+              )}
+            </div>
           </Card>
           {check && (
             <Card className='space-y-2'>

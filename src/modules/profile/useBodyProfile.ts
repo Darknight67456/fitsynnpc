@@ -26,19 +26,24 @@ export function useBodyProfile() {
     supabase
       .from('body_profiles')
       .select('*')
+      .eq('user_id', user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (cancelled) return
         if (data) setProfile(data as BodyProfile)
         setLoading(false)
       })
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [user])
 
   // returns an error message, or '' when it worked
   async function save(p: BodyProfile): Promise<string> {
     if (!user) return 'Not logged in.'
-    const { error } = await supabase.from('body_profiles').upsert({ ...p, user_id: user.id })
+    const { error } = await supabase
+      .from('body_profiles')
+      .upsert({ ...p, user_id: user.id }, { onConflict: 'user_id' })
     return error ? error.message : ''
   }
 
