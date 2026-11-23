@@ -47,7 +47,7 @@ function ItemButton({ item, selected, onClick }: { item: ClothingItem; selected:
     <button type='button' onClick={onClick} aria-pressed={selected}
       className={`rounded-lg border p-1 text-left text-xs transition ${selected ? 'border-brand ring-2 ring-brand' : 'border-ink/10 hover:bg-ink/5'}`}>
       {item.image_url
-        ? <img src={item.image_url} alt={item.name} className='aspect-square w-full rounded object-cover' />
+        ? <img src={item.image_url} alt={item.name} className='aspect-square w-full rounded bg-white object-contain' />
         : <div className='aspect-square w-full rounded' style={{ background: item.color }} />}
       <span className='mt-1 flex items-center gap-1'>
         <Swatches colors={[item.color]} />
@@ -248,7 +248,7 @@ export default function Colors() {
                   const lab = scoreLabel(p.score)
                   return (
                     <div key={p.item_id} className='space-y-1 text-sm'>
-                      {it.image_url && <img src={it.image_url} alt={it.name} className='aspect-[4/5] w-full rounded object-cover' />}
+                      {it.image_url && <img src={it.image_url} alt={it.name} className='aspect-[4/5] w-full rounded bg-white object-contain' />}
                       <p className='font-medium'>{it.name}</p>
                       <p className='flex items-center gap-2'><Swatches colors={[anchor.color, it.color]} />
                         <span className='text-xs text-muted'>{SCHEMES[p.scheme] ?? p.scheme}</span></p>
@@ -354,7 +354,7 @@ export default function Colors() {
                       const it = byId.get(sw.item_id)
                       return it ? (
                         <div key={sw.item_id} className='w-24 text-center text-xs'>
-                          {it.image_url && <img src={it.image_url} alt={it.name} className='h-24 w-24 rounded object-cover' />}
+                          {it.image_url && <img src={it.image_url} alt={it.name} className='h-24 w-24 rounded bg-white object-contain' />}
                           <p className='truncate font-medium'>{it.name}</p>
                           <p className='text-muted'>would score {sw.score}</p>
                         </div>

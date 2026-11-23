@@ -1,5 +1,6 @@
 import type { ClothingItem } from '../../types'
 import { colorName } from './colorFamily'
+import { seasonList } from './options'
 
 export interface Filters {
   search: string
@@ -23,7 +24,7 @@ export function applyFilters(items: ClothingItem[], f: Filters): ClothingItem[] 
     (!q || `${i.name} ${i.subtype ?? ''} ${i.fabric ?? ''} ${i.pattern} ${(i.tags ?? []).join(' ')}`.toLowerCase().includes(q)) &&
     (f.category === 'all' || i.category === f.category) &&
     // an "all year" item fits every season, so it also shows when you pick one
-    (f.season === 'all' || i.season === f.season || i.season === 'all') &&
+    (f.season === 'all' || seasonList(i.season).some(w => w === f.season || w === 'all')) &&
     (f.color === 'all' || colorName(i.color) === f.color) &&
     (f.pattern === 'all' || i.pattern === f.pattern))
 

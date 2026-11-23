@@ -1,6 +1,6 @@
 import { Input, Select } from '../../components/Field'
 import {
-  ACCESSORY_TYPES, CATEGORIES, FORMALITY, SEASONS, defaultsFor, materialLabel, materialsFor, patternsFor, typicalLevel,
+  ACCESSORY_TYPES, CATEGORIES, FORMALITY, SEASONS, defaultsFor, seasonList, toggleSeason, materialLabel, materialsFor, patternsFor, typicalLevel,
   type Option, type Tags,
 } from './options'
 import { colorName } from './colorFamily'
@@ -9,13 +9,14 @@ import { colorName } from './colorFamily'
 const withCurrent = (list: Option[], value: string): Option[] =>
   value && !list.some(o => o.value === value) ? [...list, { value, label: value }] : list
 
-function Choice({ active, onClick, title, hint }: {
-  active: boolean; onClick: () => void; title: string; hint?: string
+function Choice({ active, onClick, title, hint, disabled = false }: {
+  active: boolean; onClick: () => void; title: string; hint?: string; disabled?: boolean
 }) {
   return (
-    <button type='button' onClick={onClick} aria-pressed={active}
+    <button type='button' onClick={onClick} aria-pressed={active} disabled={disabled}
       className={`rounded-lg border p-2 text-left text-sm transition ${
-        active ? 'border-brand bg-brand/10 ring-1 ring-brand' : 'border-ink/20 bg-surface hover:bg-ink/5'}`}>
+        active ? 'border-brand bg-brand/10 ring-1 ring-brand' : 'border-ink/20 bg-surface hover:bg-ink/5'} ${
+        disabled ? 'cursor-not-allowed opacity-40' : ''}`}>
       <span className='block font-medium'>{title}</span>
       {hint && <span className='block text-xs text-muted'>{hint}</span>}
     </button>
@@ -113,12 +114,22 @@ export default function TagFields({ value, onChange, suggested = [] }: {
       </div>
 
       <div>
-        <span className='mb-1 block text-sm font-medium'>Season (the weather you wear it in)<Ai on={ai('season')} /></span>
+        <span className='mb-1 block text-sm font-medium'>
+          Weather you wear it in (pick any, all three = all year)<Ai on={ai('season')} />
+        </span>
         <div className='grid grid-cols-2 gap-2'>
-          {withCurrent(SEASONS, value.season).map(o => (
-            <Choice key={o.value} active={value.season === o.value} title={o.label} hint={o.hint}
-              onClick={() => set('season', o.value)} />
-          ))}
+          {(() => {
+            const chosen = seasonList(value.season)
+            const unknown = chosen.filter(v => !SEASONS.some(o => o.value === v))      // keep odd old values visible
+            const isAll = chosen.includes('all')                 // 'All year' lights up every weather too
+            return [...SEASONS, ...unknown.map(v => ({ value: v, label: v, hint: '' }))].map(o => {
+              const on = isAll || chosen.includes(o.value)
+              return (
+                <Choice key={o.value} active={on} title={o.label} hint={o.hint}
+                  onClick={() => set('season', toggleSeason(value.season, o.value))} />
+              )
+            })
+          })()}
         </div>
       </div>
 

@@ -23,8 +23,13 @@ export interface TagSuggestion {
 export async function suggestTags(photo: Blob): Promise<TagSuggestion> {
   const body = new FormData()
   body.append('photo', photo, 'item.jpg')
-  const res = await fetch(`${AI_URL}/tag`, { method: 'POST', body })
-  if (!res.ok) throw new Error('AI service could not read the photo.')
+  let res: Response
+  try {
+    res = await fetch(`${AI_URL}/tag`, { method: 'POST', body })
+  } catch {
+    throw new Error(`cannot reach the AI service at ${AI_URL}`)
+  }
+  if (!res.ok) throw new Error(`the AI service answered ${res.status}`)
   return res.json() as Promise<TagSuggestion>
 }
 
@@ -40,6 +45,10 @@ export interface AssistResult {
   formality: number | null
   message: string
   mode?: 'person' | 'item'      // 'item' = the photo shows one piece, not a person wearing clothes
+  answer?: string               // the AI's direct answer to the question (can be advice only)
+  event?: string
+  notes?: string[]
+  understood?: { summary?: string }
 }
 
 export async function assist(photo: Blob, prompt: string, items: object[]): Promise<AssistResult> {
@@ -53,11 +62,22 @@ export async function assist(photo: Blob, prompt: string, items: object[]): Prom
 }
 
 export interface Outfit { item_ids: string[]; score: number; reason: string }
-export interface RecommendResult { formality: number; weather: string; message: string; notes: string[]; outfits: Outfit[] }
+export interface Understood {
+  valid?: boolean
+  summary?: string
+  structure?: 'auto' | 'dress' | 'separates'
+  outerwear?: 'auto' | 'yes' | 'no'
+  accessories?: string[]
+  prefer_colors?: string[]
+  avoid_colors?: string[]
+}
+export interface RecommendResult {
+  formality: number; weather: string; message: string; notes: string[]; outfits: Outfit[]; understood?: Understood
+}
 
 export async function recommend(args: {
   event: string
-  items: { id: string; name: string; category: string; season: string; formality: number; formality_levels: number[]; subtype: string; wear_count: number; embedding: number[] }[]
+  items: { id: string; name: string; category: string; season: string; formality: number; formality_levels: number[]; subtype: string; color?: string; wear_count: number; embedding: number[] }[]
   formality?: number
   weather?: string
   outerwear?: 'auto' | 'yes' | 'no'

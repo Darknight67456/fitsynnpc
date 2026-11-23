@@ -59,7 +59,8 @@ def score_items(items, text_vec, formality, weather):
             levels = it.get('formality_levels') or [it['formality']]
             gap = min(abs(l - formality) for l in levels)       # the closest occasion the item suits
             s = f - 0.2 * gap                                   # being far from the right formality costs a lot
-            if weather in SEASON_NAMES and it['season'] not in ('all', weather):
+            seasons = [x.strip() for x in str(it.get('season') or 'all').split(',')]      # an item can suit two weathers
+            if weather in SEASON_NAMES and 'all' not in seasons and weather not in seasons:
                 s -= 0.3                                        # wrong weather
             scores[it['id']] = float(s)
     lo, hi = min(scores.values()), max(scores.values())
@@ -75,20 +76,47 @@ def harmony(parts):
     return float(np.mean(sims))
 
 
-def build_outfits(items, scores, weather, outerwear='auto', accessories=(), top_k=6, n=3):
+def build_outfits(items, scores, weather, outerwear='auto', accessories=(), top_k=6, n=3,
+                  structure='auto', must=()):
     """An outfit is shoes + EITHER a dress/one-piece OR a top and a bottom.
     outerwear: 'auto' (only when cool or rainy), 'yes' (always add one) or 'no'.
     accessories: accessory types to add, e.g. ['bag', 'watch']; the best item of each type is added.
+    structure: 'auto', 'dress' (one-piece wanted) or 'separates' (top + bottom wanted).
+    must: ids of items the person asked to wear; every outfit includes them.
     Returns (outfits, missing_required, notes)."""
     by_cat = {}
     for it in items:
         by_cat.setdefault(it['category'], []).append(it)
+    notes = []
+
+    must_items = [it for it in items if it['id'] in set(must)]
+    must_cat = {}
+    for it in must_items:
+        must_cat.setdefault(it['category'], []).append(it)
+    if must_cat.get('dress') and (must_cat.get('top') or must_cat.get('bottom')):
+        notes.append('A dress and a top or bottom cannot be worn together, so the dress was left out.')
+        must_items = [i for i in must_items if i['category'] != 'dress']
+        must_cat.pop('dress')
+    if must_cat.get('dress'):
+        structure = 'dress'
+    elif must_cat.get('top') or must_cat.get('bottom'):
+        structure = 'separates'
 
     modes = []                                                   # each mode = the slots to fill
-    if by_cat.get('top') and by_cat.get('bottom'):
-        modes.append(['top', 'bottom'])
-    if by_cat.get('dress'):
+    can_sep = bool(by_cat.get('top') and by_cat.get('bottom'))
+    can_dress = bool(by_cat.get('dress'))
+    if structure == 'dress' and can_dress:
         modes.append(['dress'])
+    elif structure == 'separates' and can_sep:
+        modes.append(['top', 'bottom'])
+    else:
+        if structure != 'auto':
+            notes.append('You have no dress saved, so these outfits use a top and bottom.' if structure == 'dress'
+                         else 'You have no top and bottom pair saved, so these outfits use a dress.')
+        if can_sep:
+            modes.append(['top', 'bottom'])
+        if can_dress:
+            modes.append(['dress'])
     missing = []
     if not modes:
         missing.append('a dress, or a top and a bottom')
@@ -97,8 +125,8 @@ def build_outfits(items, scores, weather, outerwear='auto', accessories=(), top_
     if missing:
         return [], missing, []
 
-    notes = []
-    want_outer = outerwear == 'yes' or (outerwear == 'auto' and weather in ('cool', 'rainy'))
+    want_outer = outerwear == 'yes' or bool(must_cat.get('outerwear')) or \
+        (outerwear == 'auto' and weather in ('cool', 'rainy'))
     layer = []
     if want_outer:
         if by_cat.get('outerwear'):
@@ -108,7 +136,9 @@ def build_outfits(items, scores, weather, outerwear='auto', accessories=(), top_
     acc_by_type = {}
     for it in by_cat.get('accessory', []):
         acc_by_type.setdefault(it.get('subtype') or 'other', []).append(it)
-    wanted = [t for t in dict.fromkeys(accessories) if acc_by_type.get(t)]
+    forced_acc = must_cat.get('accessory', [])                   # accessories the person named
+    forced_types = {a.get('subtype') or 'other' for a in forced_acc}
+    wanted = [t for t in dict.fromkeys(accessories) if acc_by_type.get(t) and t not in forced_types]
     for t in dict.fromkeys(accessories):
         if not acc_by_type.get(t):
             notes.append(f'You have no {t} saved, so these outfits have none.')
@@ -116,7 +146,12 @@ def build_outfits(items, scores, weather, outerwear='auto', accessories=(), top_
     combos = []
     for mode in modes:
         slots = mode + ['shoes'] + layer
-        pools = [sorted(by_cat[s], key=lambda i: -scores[i['id']])[:top_k] for s in slots]
+        pools = []
+        for s in slots:
+            if must_cat.get(s):
+                pools.append(must_cat[s][:1])                    # the person picked this piece
+            else:
+                pools.append(sorted(by_cat[s], key=lambda i: -scores[i['id']])[:top_k])
         for parts in product(*pools):
             item_score = float(np.mean([scores[p['id']] for p in parts]))
             fresh = float(np.mean([1 / (1 + p.get('wear_count', 0)) for p in parts]))   # nudges toward clothes you rarely wear
@@ -145,6 +180,8 @@ def build_outfits(items, scores, weather, outerwear='auto', accessories=(), top_
             pick = max(acc_by_type[t], key=fit)        # the small penalty gives each outfit a different one when possible
             used.add(pick['id'])
             c['parts'] = c['parts'] + [pick]
+        for a in forced_acc:
+            c['parts'] = c['parts'] + [a]
     return chosen, [], notes
 
 

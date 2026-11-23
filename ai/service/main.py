@@ -12,6 +12,7 @@ from pydantic import BaseModel
 import colortheory
 import compat
 import features
+import intent
 import recommend as R
 import stylist
 import tagger
@@ -50,6 +51,7 @@ class Item(BaseModel):
     season: str = 'all'
     formality: int = 2
     subtype: str | None = None                    # accessories only: bag, watch, ring...
+    color: str | None = None                      # '#rrggbb', lets the AI understand colour wishes
     formality_levels: list[int] | None = None     # every level the item suits (all 5 = all occasions)
     wear_count: int = 0
     embedding: list[float]
@@ -64,23 +66,55 @@ class Request(BaseModel):
     accessories: list[str] = []       # accessory types to add: 'bag', 'watch', 'ring', ...
 
 
-def ask_llm(prompt: str, max_tokens: int = 400):
+def _ask_gemini(prompt, as_json):
+    """Tries the chosen Gemini model, retries when it is busy (503/429), then tries backup models."""
+    import time
+    from google import genai
+    client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
+    kwargs = {}
+    if as_json:
+        from google.genai import types
+        kwargs['config'] = types.GenerateContentConfig(response_mime_type='application/json')
+    models = [os.getenv('GEMINI_MODEL', 'gemini-3.5-flash-lite')] + [
+        m.strip() for m in os.getenv('GEMINI_FALLBACK_MODELS', 'gemini-3.8-flash,gemini-3.1-flash-lite').split(',') if m.strip()]
+    last = None
+    for model in dict.fromkeys(models):
+        for attempt in range(2):
+            try:
+                return client.models.generate_content(model=model, contents=prompt, **kwargs).text
+            except Exception as e:
+                last = e
+                text = str(e)
+                busy = any(c in text for c in ('503', '429', 'UNAVAILABLE', 'RESOURCE_EXHAUSTED'))
+                if busy and attempt == 0:
+                    time.sleep(1.5)                      # busy: wait a moment, try the same model once more
+                    continue
+                break                                    # not found / bad key / still busy: next model
+    raise last
+
+
+LAST_LLM_ERROR = ''
+
+
+def ask_llm(prompt: str, max_tokens: int = 400, as_json: bool = False):
     """Asks whichever AI chat service has a key set. Returns the answer text, or None.
-    GEMINI_API_KEY -> Google Gemini (free tier). ANTHROPIC_API_KEY -> Claude. Neither -> None."""
+    GEMINI_API_KEY -> Google Gemini (free tier). ANTHROPIC_API_KEY -> Claude. Neither -> None.
+    The reason for a failure is kept in LAST_LLM_ERROR so the website can tell the person."""
+    global LAST_LLM_ERROR
+    LAST_LLM_ERROR = ''
     try:
         if os.getenv('GEMINI_API_KEY'):
-            from google import genai
-            client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
-            res = client.models.generate_content(
-                model=os.getenv('GEMINI_MODEL', 'gemini-2.5-flash'), contents=prompt)
-            return res.text
+            return _ask_gemini(prompt, as_json)
         if os.getenv('ANTHROPIC_API_KEY'):
             import anthropic
             msg = anthropic.Anthropic(api_key=os.environ['ANTHROPIC_API_KEY']).messages.create(
-                model=os.getenv('ANTHROPIC_MODEL', 'claude-sonnet-5-5'), max_tokens=max_tokens,
+                model=os.getenv('ANTHROPIC_MODEL', 'claude-sonnet-5-5'), max_tokens=max(max_tokens, 800),
                 messages=[{'role': 'user', 'content': prompt}])
             return msg.content[0].text
-    except Exception:
+        LAST_LLM_ERROR = 'no GEMINI_API_KEY or ANTHROPIC_API_KEY is set on the AI service'
+    except Exception as e:
+        LAST_LLM_ERROR = f'{type(e).__name__}: {str(e)[:160]}'
+        print('ask_llm failed:', LAST_LLM_ERROR, flush=True)
         return None
     return None
 
@@ -92,20 +126,6 @@ def parse_json(text):
         text = text.split('\n', 1)[1] if '\n' in text else text
         text = text.rsplit('```', 1)[0]
     return json.loads(text)
-
-
-def llm_interpret(event: str):
-    """Optional: the chat AI reads the event text. Returns (formality, weather) or None."""
-    text = ask_llm(
-        'Event: ' + event + '\nReturn ONLY JSON like {"formality": 3, "weather": "hot"}. '
-        'formality: 1 loungewear, 2 casual, 3 smart casual, 4 business, 5 formal. '
-        'weather: hot (sunny/outdoor in Malaysia), rainy, cool (air-con/cold), or all.', 100)
-    try:
-        data = parse_json(text) if text else None
-        w = str(data['weather'])
-        return (int(data['formality']), w if w in R.WEATHER_PROMPTS else 'all') if data else None
-    except Exception:
-        return None
 
 
 def llm_reasons(event, outfits):
@@ -122,6 +142,10 @@ def llm_reasons(event, outfits):
         return None
 
 
+def _ask_json(prompt):
+    return ask_llm(prompt, 900, as_json=True)
+
+
 @app.post('/recommend')
 def recommend(req: Request):
     if not req.event.strip():
@@ -130,27 +154,55 @@ def recommend(req: Request):
     for i in items:
         i['embedding'] = np.array(i['embedding'], dtype=np.float32)
 
-    text_vec = features.embed_text([req.event])[0]
+    # 1. The chat AI reads the free-text request and turns it into a plan.
+    plan = intent.parse_request(req.event, items, _ask_json) if items else None
+    notes = []
+    if plan is None:
+        reason = LAST_LLM_ERROR or 'the AI chat service did not answer'
+        notes.append(f'The AI chat service is not available ({reason}), so a simpler match was used.')
+    elif not plan['valid']:
+        return {'formality': req.formality or 2, 'weather': req.weather or 'all', 'outfits': [], 'notes': [],
+                'message': 'That does not sound like something to dress for. Try an event, place, weather or mood.',
+                'understood': plan}
 
-    formality, weather = req.formality, req.weather
-    if formality is None or weather is None:
-        guess = llm_interpret(req.event)
-        if guess is None:                                          # no AI chat key: zero-shot with Fashion-CLIP
-            fv = features.embed_text(R.FORMALITY_PROMPTS)
-            wv = dict(zip(R.WEATHER_PROMPTS, features.embed_text(list(R.WEATHER_PROMPTS.values()))))
-            guess = R.understand_event(text_vec, fv, wv)
-        formality = formality if formality is not None else guess[0]
-        weather = weather if weather is not None else guess[1]
-    formality = max(1, min(5, formality))
+    # 2. What the person picked by hand always wins over what the AI guessed.
+    guess_f = plan['formality'] if plan else None
+    guess_w = plan['weather'] if plan else None
+    formality, weather = req.formality or guess_f, req.weather or guess_w
 
-    scores = R.score_items(items, text_vec, formality, weather)
-    chosen, missing, notes = R.build_outfits(items, scores, weather, req.outerwear, req.accessories)
+    # 3. The text the clothing photos are matched against: the request plus the AI's description of the look.
+    texts = [req.event] + ([plan['style_text']] if plan and plan['style_text'] else [])
+    vecs = features.embed_text(texts)
+    text_vec = vecs.mean(axis=0)
+    text_vec = text_vec / (np.linalg.norm(text_vec) or 1.0)
+
+    if formality is None or weather is None:                       # no AI chat: zero-shot with Fashion-CLIP
+        fv = features.embed_text(R.FORMALITY_PROMPTS)
+        wv = dict(zip(R.WEATHER_PROMPTS, features.embed_text(list(R.WEATHER_PROMPTS.values()))))
+        zf, zw = R.understand_event(text_vec, fv, wv)
+        formality = formality or zf
+        weather = weather or zw
+    formality = max(1, min(5, int(formality)))
+
+    outerwear = req.outerwear if req.outerwear != 'auto' else (plan['outerwear'] if plan else 'auto')
+    accessories = list(dict.fromkeys(list(req.accessories) + (plan['accessories'] if plan else [])))
+    skip = set(plan['exclude']) if plan else set()
+    pool = [i for i in items if i['id'] not in skip]
+
+    scores = R.score_items(pool, text_vec, formality, weather) if pool else {}
+    if plan:
+        scores = intent.adjust_for_colors(pool, scores, plan['prefer_colors'], plan['avoid_colors'])
+    chosen, missing, more = R.build_outfits(
+        pool, scores, weather, outerwear, accessories,
+        structure=plan['structure'] if plan else 'auto', must=plan['must_include'] if plan else ())
+    notes += more
+    understood = plan or {'summary': '', 'valid': True}
     if missing:
-        return {'formality': formality, 'weather': weather, 'outfits': [], 'notes': [],
+        return {'formality': formality, 'weather': weather, 'outfits': [], 'notes': notes, 'understood': understood,
                 'message': 'Add ' + ' and '.join(missing) + ' to your wardrobe to get outfits.'}
 
     reasons = llm_reasons(req.event, chosen) or [R.template_reason(c, formality, weather) for c in chosen]
-    return {'formality': formality, 'weather': weather, 'message': '', 'notes': notes,
+    return {'formality': formality, 'weather': weather, 'message': '', 'notes': notes, 'understood': understood,
             'outfits': [{'item_ids': [p['id'] for p in c['parts']],
                          'score': round(c['score'], 3), 'reason': r}
                         for c, r in zip(chosen, reasons)]}
@@ -169,22 +221,6 @@ TARGET_PHRASES = {
     'hairwear': 'a hair clip or hair band', 'eyewear': 'glasses or sunglasses', 'gloves': 'gloves',
     'legwear': 'stockings or socks', 'belt': 'a belt',
 }
-
-
-def llm_intent(question, worn, allowed):
-    """Optional: the chat AI works out what the person is asking for. Returns (targets, event) or None."""
-    text = ask_llm(
-        f'A person is wearing: {worn}.\nThey ask: "{question}"\n'
-        f'Which kinds of item from their wardrobe do they want? Choose from: {", ".join(allowed)}. '
-        '"suggest accessories" means several accessory types. '
-        'Also give a short "event" (like "wedding" or "office") if they mention one, else "". '
-        'Return ONLY JSON like {"targets": ["bottom"], "event": ""}.', 200)
-    try:
-        data = parse_json(text) if text else None
-        targets = [t for t in (data or {}).get('targets', []) if t in allowed]
-        return (targets, str(data.get('event', ''))) if targets else None
-    except Exception:
-        return None
 
 
 def zero_shot_targets(question, wardrobe):
@@ -241,23 +277,51 @@ async def assist(photo: UploadFile = File(...), prompt: str = Form(''), items: s
 
     worn = ', '.join(f"{g['subtype'] or g['category']} (color {g['color']})" for g in garments)
     question = prompt.strip() or 'What goes well with what I am wearing?'
+    wardrobe_ok = [i for i in wardrobe]
+    plan = intent.parse_stylist_request(question, worn, wardrobe_ok, _ask_json)
+    notes = []
+    if plan is None:
+        reason = LAST_LLM_ERROR or 'the AI chat service did not answer'
+        notes.append(f'The AI chat service is not available ({reason}), so a simpler match was used.')
+    skip = set(plan['exclude']) if plan else set()
+    pool = [i for i in wardrobe if i['id'] not in skip]
+
     allowed = ['top', 'bottom', 'dress', 'outerwear', 'shoes'] + ACCESSORY_TYPES
-    intent = llm_intent(question, worn, allowed)
-    if intent:
-        targets, event = intent
+    targets = list(plan['targets']) if plan else []
+    if plan:                                            # a piece they named is always shown under its own heading
+        for i in pool:
+            if i['id'] in plan['must_include']:
+                t = (i.get('subtype') or 'other') if i['category'] == 'accessory' else i['category']
+                if t in allowed and t not in targets:
+                    targets.append(t)
+    advice_only = bool(plan and plan['answer'] and not targets)
+    if not targets and not advice_only:
+        targets = zero_shot_targets(question, pool or wardrobe)
+    event = plan['event'] if plan else ''
+    if plan and plan['formality']:
+        formality = float(plan['formality'])            # the person said how formal the look should be
+    texts = [t for t in ([event, plan['style_text']] if plan else []) if t.strip()]
+    if texts:
+        v = features.embed_text(texts).mean(axis=0)
+        text_vec = v / (np.linalg.norm(v) or 1.0)
     else:
-        targets, event = zero_shot_targets(question, wardrobe), ''
-    text_vec = features.embed_text([event])[0] if event.strip() else None
+        text_vec = None
 
     anchors = [g for g in garments if (g['subtype'] or g['category']) not in targets]
-    results = stylist.rank_targets(anchors, targets, wardrobe, text_vec, formality)
+    results = stylist.rank_targets(anchors, targets, pool, text_vec, formality, n=6) if targets else []
+    if plan:
+        results = intent.rerank(results, plan)
+    else:
+        for r in results:
+            r['picks'] = r['picks'][:3]
     shown = [r for r in results if r['picks']]
     reasons = (llm_stylist_reasons(question, worn, shown) if shown else None) or [
         f"Matches the style and dress code of what you are wearing ({R.FORMALITY_NAMES.get(round(formality), 'casual')})." for _ in shown]
     reason_of = {id(r): why for r, why in zip(shown, reasons)}
 
     return {
-        'formality': round(formality, 1), 'event': event, 'message': '', 'mode': mode,
+        'formality': round(formality, 1), 'event': event, 'message': '', 'mode': mode, 'notes': notes,
+        'answer': plan['answer'] if plan else '', 'understood': {'summary': plan['summary'] if plan else ''},
         'detected': [{'category': g['category'], 'subtype': g['subtype'], 'color': g['color'],
                       'image': stylist.thumbnail_data_uri(g['crop'])} for g in garments],
         'targets': [{'target': r['target'], 'reason': reason_of.get(id(r), ''),
@@ -274,8 +338,16 @@ async def tag(photo: UploadFile = File(...)):
     except Exception:
         raise HTTPException(400, 'Could not read that image.')
     img = flatten_on_white(img)
-    garments = stylist.detect_garments(img)
-    result = tagger.suggest(img, garments)
+    try:
+        garments = stylist.detect_garments(img)
+    except Exception as e:                      # the clothes detector failed: look at the whole photo instead
+        print('detect_garments failed:', repr(e), flush=True)
+        garments = []
+    try:
+        result = tagger.suggest(img, garments)
+    except Exception as e:
+        print('tagger.suggest failed:', repr(e), flush=True)
+        raise HTTPException(500, f'Tagging failed: {type(e).__name__}')
     result['embedding'] = features.embed_images([img])[0].tolist()      # same as /embed, so the site can find similar items
     return result
 

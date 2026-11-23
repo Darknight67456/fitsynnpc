@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useWardrobe } from '../modules/wardrobe/useWardrobe'
 import { COLOR_NAMES, colorName } from '../modules/wardrobe/colorFamily'
 import { applyFilters, filtersActive, NO_FILTERS, type Filters } from '../modules/wardrobe/wardrobeFilters'
-import { ACCESSORY_TYPES, ALL_PATTERNS, CATEGORIES, SEASONS, labelOf, occasionText } from '../modules/wardrobe/options'
+import { ACCESSORY_TYPES, ALL_PATTERNS, CATEGORIES, SEASONS, labelOf, occasionText, seasonText } from '../modules/wardrobe/options'
 import UploadForm from '../modules/wardrobe/UploadForm'
 import EditModal from '../modules/wardrobe/EditModal'
 import WearModal from '../modules/wardrobe/WearModal'
@@ -101,7 +101,7 @@ export default function Wardrobe() {
       <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
         {shown.map(item => (
           <Card key={item.id} className='overflow-hidden !p-0'>
-            {item.image_url && <img src={item.image_url} alt={item.name} className='aspect-[4/5] w-full object-cover' />}
+            {item.image_url && <img src={item.image_url} alt={item.name} className='aspect-[4/5] w-full bg-white object-contain' />}
             <div className='space-y-2 p-3 text-sm'>
               <p className='font-semibold'>{item.name}</p>
               <div className='flex flex-wrap gap-1 text-xs'>
@@ -110,7 +110,7 @@ export default function Wardrobe() {
                   {colorName(item.color)}
                 </span>
                 <span className='rounded-full bg-ink/5 px-2 py-0.5'>{item.category === 'accessory' && item.subtype ? labelOf(ACCESSORY_TYPES, item.subtype) : labelOf(CATEGORIES, item.category)}</span>
-                <span className='rounded-full bg-ink/5 px-2 py-0.5'>{labelOf(SEASONS, item.season)}</span>
+                <span className='rounded-full bg-ink/5 px-2 py-0.5'>{seasonText(item.season)}</span>
                 <span className='rounded-full bg-ink/5 px-2 py-0.5'>{occasionText(item.formality_levels, item.formality)}</span>
               </div>
               <p className='text-xs text-muted'>

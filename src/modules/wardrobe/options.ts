@@ -82,6 +82,26 @@ export const SEASONS: Option[] = [
   { value: 'cool', label: 'Cool or air-con', hint: 'layers, knits, jackets' },
 ]
 
+// An item can suit one weather, two, or all of them ('all'). They are kept in the one "season" column as text like 'hot,rainy',
+// so older items (a single value) keep working with no data change.
+const WEATHER_ORDER = ['hot', 'rainy', 'cool']
+export const seasonList = (s?: string | null): string[] => {
+  const parts = (s ?? 'all').split(',').map(x => x.trim()).filter(Boolean)
+  return parts.length ? parts : ['all']
+}
+export const seasonText = (s?: string | null): string => seasonList(s).map(v => labelOf(SEASONS, v)).join(' + ')
+/** Tap a weather. 'All year' means every weather is on; tapping one of them then leaves the other two.
+ *  Tapping a chosen one removes it; picking the third weather turns it into 'All year'. */
+export function toggleSeason(current: string, value: string): string {
+  if (value === 'all') return 'all'
+  let list = seasonList(current).includes('all') ? [...WEATHER_ORDER] : seasonList(current)
+  if (list.includes(value)) list = list.filter(v => v !== value)
+  else list = [...list, value]
+  if (WEATHER_ORDER.every(w => list.includes(w))) return 'all'
+  if (list.length === 0) return 'all'
+  return [...WEATHER_ORDER.filter(w => list.includes(w)), ...list.filter(w => !WEATHER_ORDER.includes(w))].join(',')
+}
+
 // Formality is 1 to 5 in the database (the AI models use the number).
 // People pick it by a named level with an example, not by a slider.
 export const FORMALITY: Option[] = [

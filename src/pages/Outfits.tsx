@@ -61,7 +61,7 @@ export default function Outfits() {
         items: ready.map(i => ({
           id: i.id, name: i.name, category: i.category, season: i.season,
           formality: i.formality, formality_levels: i.formality_levels?.length ? i.formality_levels : [i.formality],
-          subtype: i.subtype ?? '',
+          subtype: i.subtype ?? '', color: i.color,
           wear_count: i.wear_count, embedding: i.embedding as number[],
         })),
         formality: formality ? Number(formality) : undefined,
@@ -89,12 +89,12 @@ export default function Outfits() {
     <div className='mx-auto max-w-5xl space-y-4 p-4'>
       <div>
         <h1 className='text-2xl font-bold'>Outfits for an event</h1>
-        <p className='text-sm text-muted'>Tell the AI where you are going. It builds outfits from your own wardrobe.</p>
+        <p className='text-sm text-muted'>Type anything: an event, the weather, a mood, a colour, a piece you want to wear. The AI reads it and builds outfits from your own wardrobe.</p>
       </div>
 
       <Card className='space-y-3'>
-        <textarea rows={2} required aria-required='true' value={event} onChange={e => setEvent(e.target.value)}
-          placeholder="e.g. friend's wedding, outdoors, evening"
+        <textarea rows={3} required aria-required='true' value={event} onChange={e => setEvent(e.target.value)}
+          placeholder="e.g. friend's wedding outdoors this evening, no dress, nothing black, wear my navy blazer"
           className='w-full rounded-lg border border-ink/20 bg-surface p-2 text-sm focus:border-brand focus:outline-none' />
         <div className='flex flex-wrap gap-2'>
           {THEMES.map(t => (
@@ -115,7 +115,7 @@ export default function Outfits() {
         <div className='space-y-3'>
           <Select label='Outerwear (jacket, blazer)' value={outerwear}
             onChange={e => setOuterwear(e.target.value as 'auto' | 'yes' | 'no')}>
-            <option value='auto'>Only if cool or rainy</option>
+            <option value='auto'>Let the AI decide</option>
             <option value='yes'>Always add one</option>
             <option value='no'>No outerwear</option>
           </Select>
@@ -157,9 +157,24 @@ export default function Outfits() {
 
       {result && (
         <div className='space-y-3'>
-          <p className='text-sm text-muted'>
-            Read as: {labelOf(FORMALITY, result.formality)} · {labelOf(SEASONS, result.weather)}
-          </p>
+          <Card className='space-y-1'>
+            <p className='text-sm font-medium'>How I understood it</p>
+            {result.understood?.summary && <p className='text-sm'>{result.understood.summary}</p>}
+            <div className='flex flex-wrap gap-2 text-xs'>
+              <span className='rounded-full bg-ink/5 px-2 py-1'>{labelOf(FORMALITY, result.formality)}</span>
+              <span className='rounded-full bg-ink/5 px-2 py-1'>{labelOf(SEASONS, result.weather)}</span>
+              {result.understood?.structure && result.understood.structure !== 'auto' && (
+                <span className='rounded-full bg-ink/5 px-2 py-1'>
+                  {result.understood.structure === 'dress' ? 'Dress / one-piece' : 'Top and bottom'}
+                </span>
+              )}
+              {result.understood?.outerwear === 'yes' && <span className='rounded-full bg-ink/5 px-2 py-1'>With outerwear</span>}
+              {result.understood?.outerwear === 'no' && <span className='rounded-full bg-ink/5 px-2 py-1'>No outerwear</span>}
+              {result.understood?.accessories?.map(a => <span key={a} className='rounded-full bg-ink/5 px-2 py-1'>{a}</span>)}
+              {result.understood?.prefer_colors?.map(c => <span key={c} className='rounded-full bg-ink/5 px-2 py-1'>+ {c}</span>)}
+              {result.understood?.avoid_colors?.map(c => <span key={c} className='rounded-full bg-ink/5 px-2 py-1'>no {c}</span>)}
+            </div>
+          </Card>
           {result.message && <Card>{result.message}</Card>}
           {result.notes?.map(n => <p key={n} className='text-sm text-muted'>{n}</p>)}
           {result.outfits.map((o, idx) => (

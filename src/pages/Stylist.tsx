@@ -42,7 +42,7 @@ export default function Stylist() {
     setBusy(true)
     try {
       setResult(await assist(photo, prompt, ready.map(i => ({
-        id: i.id, name: i.name, category: i.category, subtype: i.subtype ?? null,
+        id: i.id, name: i.name, category: i.category, subtype: i.subtype ?? null, color: i.color,
         formality: i.formality, formality_levels: i.formality_levels?.length ? i.formality_levels : [i.formality],
         embedding: i.embedding,
       }))))
@@ -67,8 +67,8 @@ export default function Stylist() {
         <SelfieCapture onPhoto={p => { setPhoto(p); setResult(null) }} />
         {preview && <img src={preview} alt='your photo' className='max-h-72 rounded-lg' />}
 
-        <textarea rows={2} required aria-required='true' value={prompt} onChange={e => setPrompt(e.target.value)}
-          placeholder='Ask anything, e.g. what bottom fits this shirt?'
+        <textarea rows={3} required aria-required='true' value={prompt} onChange={e => setPrompt(e.target.value)}
+          placeholder="Ask anything, e.g. is this too formal for a hangout? what shoes for a wedding? add a bag, nothing black"
           className='w-full rounded-lg border border-ink/20 bg-surface p-2 text-sm focus:border-brand focus:outline-none' />
         <div className='flex flex-wrap gap-2'>
           {QUICK.map(q => (
@@ -96,6 +96,15 @@ export default function Stylist() {
       {result && (
         <div className='space-y-4'>
           {result.message && <Card>{result.message}</Card>}
+          {result.notes?.map(n => <p key={n} className='text-sm text-muted'>{n}</p>)}
+          {(result.answer || result.understood?.summary) && (
+            <Card className='space-y-1'>
+              {result.answer && <p className='text-sm'>{result.answer}</p>}
+              {result.understood?.summary && (
+                <p className='text-xs text-muted'>How I understood it: {result.understood.summary}</p>
+              )}
+            </Card>
+          )}
 
           {result.detected.length > 0 && (
             <Card className='space-y-2'>
@@ -126,7 +135,7 @@ export default function Stylist() {
                   const it = byId.get(p.item_id)
                   return it ? (
                     <div key={p.item_id} className='text-sm'>
-                      {it.image_url && <img src={it.image_url} alt={it.name} className='aspect-[4/5] w-full rounded object-cover' />}
+                      {it.image_url && <img src={it.image_url} alt={it.name} className='aspect-[4/5] w-full rounded bg-white object-contain' />}
                       <p className='mt-1 font-medium'>{it.name}</p>
                       <p className='text-xs text-muted'>match {Math.round(p.score * 100)}%</p>
                     </div>
